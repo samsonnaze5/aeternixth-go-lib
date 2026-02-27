@@ -19,3 +19,54 @@ tasks:
       - fmt
       - imports
     silent: false
+
+  release:patch:
+    desc: Bump patch version, tag and push (v0.1.0 → v0.1.1)
+    cmds:
+      - |
+        LATEST=$(git tag --sort=-v:refname | head -n 1)
+        if [ -z "$LATEST" ]; then
+          NEXT="v0.0.1"
+        else
+          MAJOR=$(echo "$LATEST" | sed 's/v//' | cut -d. -f1)
+          MINOR=$(echo "$LATEST" | sed 's/v//' | cut -d. -f2)
+          PATCH=$(echo "$LATEST" | sed 's/v//' | cut -d. -f3)
+          NEXT="v${MAJOR}.${MINOR}.$((PATCH + 1))"
+        fi
+        echo "📦 ${LATEST:-none} → ${NEXT}"
+        git tag "$NEXT"
+        git push origin "$NEXT"
+        echo "✅ Released ${NEXT}"
+
+  release:minor:
+    desc: Bump minor version, tag and push (v0.1.0 → v0.2.0)
+    cmds:
+      - |
+        LATEST=$(git tag --sort=-v:refname | head -n 1)
+        if [ -z "$LATEST" ]; then
+          NEXT="v0.1.0"
+        else
+          MAJOR=$(echo "$LATEST" | sed 's/v//' | cut -d. -f1)
+          MINOR=$(echo "$LATEST" | sed 's/v//' | cut -d. -f2)
+          NEXT="v${MAJOR}.$((MINOR + 1)).0"
+        fi
+        echo "📦 ${LATEST:-none} → ${NEXT}"
+        git tag "$NEXT"
+        git push origin "$NEXT"
+        echo "✅ Released ${NEXT}"
+
+  release:major:
+    desc: Bump major version, tag and push (v0.1.0 → v1.0.0)
+    cmds:
+      - |
+        LATEST=$(git tag --sort=-v:refname | head -n 1)
+        if [ -z "$LATEST" ]; then
+          NEXT="v1.0.0"
+        else
+          MAJOR=$(echo "$LATEST" | sed 's/v//' | cut -d. -f1)
+          NEXT="v$((MAJOR + 1)).0.0"
+        fi
+        echo "📦 ${LATEST:-none} → ${NEXT}"
+        git tag "$NEXT"
+        git push origin "$NEXT"
+        echo "✅ Released ${NEXT}"
