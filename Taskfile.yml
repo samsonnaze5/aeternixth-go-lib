@@ -1,0 +1,21 @@
+version: "3"
+
+tasks:
+  fmt:
+    desc: Format all Go files in the project with gofmt
+    cmds:
+      - gofmt -w .
+    silent: false
+
+  imports:
+    desc: Organize imports for all Go files in the project with goimports
+    cmds:
+      - goimports -w .
+    silent: false
+
+  format:
+    desc: Format and organize imports for all Go files in the project
+    deps:
+      - fmt
+      - imports
+    silent: false
