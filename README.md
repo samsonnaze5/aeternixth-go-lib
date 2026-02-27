@@ -246,6 +246,98 @@ p := &logutil.Payloader{}
 p.Print(myStruct) // Output: PAYLOAD {"field":"value"}
 ```
 
+---
+
+### `fiber` — Fiber Context Helpers
+
+Type-safe helper functions for extracting route parameters, query strings, request bodies, and authenticated user information from [Fiber](https://gofiber.io/) handlers. Uses generics for request body and query parsing with built-in validation.
+
+```go
+import "github.com/samsonnaze5/aeternixth-go-lib/fiber"
+
+// Extract a required UUID route parameter
+app.Delete("/orders/:orderID", func(c *fiber.Ctx) error {
+    orderID, err := fiberutil.GetParamsUUID(c, "orderID")
+    if err != nil {
+        return err // 400: "orderID parameter is not a valid UUID"
+    }
+    // ...
+})
+
+// Parse and validate request body into a typed struct
+type CreateUserRequest struct {
+    Name  string `json:"name" validate:"required,min=2"`
+    Email string `json:"email" validate:"required,email"`
+}
+
+app.Post("/users", func(c *fiber.Ctx) error {
+    req, err := fiberutil.GetRequestBody[CreateUserRequest](c)
+    if err != nil {
+        return err // 400 with validation details
+    }
+    // use req.Name, req.Email ...
+})
+
+// Parse and validate query parameters
+type ListParams struct {
+    Page  int `query:"page" validate:"required,min=1"`
+    Limit int `query:"limit" validate:"required,min=1,max=100"`
+}
+
+app.Get("/items", func(c *fiber.Ctx) error {
+    params, err := fiberutil.GetQueryParams[ListParams](c)
+    if err != nil {
+        return err
+    }
+    // use params.Page, params.Limit ...
+})
+
+// Retrieve authenticated user (set by middleware.JWTMiddleware)
+app.Get("/profile", authMiddleware, func(c *fiber.Ctx) error {
+    user, err := fiberutil.GetUser(c) // *middleware.UserInfo
+    if err != nil {
+        return err
+    }
+    // user.UserID, user.Username, user.Email, user.Role
+})
+```
+
+**Functions:** `GetParamsStringID`, `GetParamsUUID`, `GetRequestBody[T]`, `GetQueryParams[T]`, `GetUser`, `GetUserID`, `GetUsername`, `GetUserRole`, `MustGetUser`, `MustGetUserID`
+
+---
+
+### `middleware` — Fiber Middleware
+
+JWT authentication middleware, global error handler, panic recovery, and 404 handler for [Fiber](https://gofiber.io/) applications. Integrates with the `errors`, `jwt`, and `fiber` packages.
+
+```go
+import "github.com/samsonnaze5/aeternixth-go-lib/middleware"
+
+// Setup Fiber app with error handling and panic recovery
+app := fiber.New(fiber.Config{
+    ErrorHandler: middleware.ErrorHandler(),
+})
+app.Use(middleware.RecoverMiddleware())
+
+// JWT authentication
+jwtSvc := jwtutil.NewJWTService[*middleware.Claims](secretKey, middleware.NewEmptyClaims)
+
+// Required auth — returns 401 if token is missing/invalid
+app.Get("/profile", middleware.JWTMiddleware(jwtSvc), profileHandler)
+
+// Optional auth — continues without user info if no token
+app.Get("/products", middleware.OptionalJWTMiddleware(jwtSvc), productsHandler)
+
+// Generate a token
+claims := middleware.NewClaims(userID, username, email, "admin", 24*time.Hour)
+token, err := jwtSvc.GenerateToken(claims)
+
+// Catch-all 404 handler (register last)
+app.Use(middleware.NotFoundHandler())
+```
+
+**Exports:** `Claims`, `NewEmptyClaims`, `NewClaims`, `UserInfo`, `JWTMiddleware`, `OptionalJWTMiddleware`, `ErrorHandler`, `RecoverMiddleware`, `NotFoundHandler`
+
 ## License
 
 MIT

@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Go utility library (`github.com/samsonnaze5/aeternixth-go-lib`) — a collection of 13 reusable packages for backend applications. Requires Go 1.25+.
+Go utility library (`github.com/samsonnaze5/aeternixth-go-lib`) — a collection of 15 reusable packages for backend applications. Requires Go 1.25+.
 
 ## Common Commands
 
@@ -17,7 +17,7 @@ task format           # Format code (gofmt + goimports via Taskfile)
 
 ## Architecture
 
-Flat package structure — each directory is an independent utility package with no cross-package dependencies (except `response` depends on `errors`).
+Flat package structure — each directory is an independent utility package with no cross-package dependencies (except `response` depends on `errors`, `fiber` depends on `middleware`/`errors`/`validator`, and `middleware` depends on `errors`/`jwt`).
 
 **Critical: directory names differ from package names for several packages:**
 
@@ -27,16 +27,18 @@ Flat package structure — each directory is an independent utility package with
 | `jwt/` | `jwtutil` | `.../jwt` |
 | `defaults/` | `defaultutil` | `.../defaults` |
 | `password/` | `passwordutil` | `.../password` |
+| `fiber/` | `fiberutil` | `.../fiber` |
 
 All other packages match their directory names.
 
 ## Key Design Patterns
 
-- **Generics** used in `pagination.Response[T]` and `jwtutil.JWTService[T jwt.Claims]`
+- **Generics** used in `pagination.Response[T]`, `jwtutil.JWTService[T jwt.Claims]`, `fiberutil.GetRequestBody[T]`, and `fiberutil.GetQueryParams[T]`
 - **Dependency Inversion** in `gmail`: callers depend on `EmailSender` interface, not concrete `GmailSender`
 - **Immutable value objects** in `gmail`: `Message` uses unexported fields + getters to enforce construction through `NewMessage()` validation
 - **Sentinel errors** throughout (errors.Is()-compatible): `gmail.ErrEmptyRecipient`, `jwtutil.ErrExpiredToken`, etc.
 - **`response` + `errors` pairing**: `response` package imports `errors` as `apperrors` and wraps `AppError` into Fiber HTTP responses
+- **Middleware chain**: `middleware` package provides JWT auth, error handling, panic recovery, and 404 handling for Fiber apps; `fiber` (fiberutil) provides typed helpers to extract params, body, query, and user info from `fiber.Ctx`
 
 ## Code Style
 
