@@ -12,6 +12,21 @@ Requires **Go 1.25+**
 
 ## Packages
 
+### `decimal` — High-Precision Financial Calculations
+
+Wraps `github.com/shopspring/decimal` to provide accurate 6-digit decimal precision operations without float64 inaccuracies. Designed for robust financial math.
+
+```go
+import "github.com/samsonnaze5/aeternixth-go-lib/decimal"
+
+val, err := decimal.NewFromString("123.456")
+zero := decimal.Zero()
+```
+
+**Supported types/features:** Direct alias of `shopspring/decimal.Decimal` with built-in JSON/SQL marshaling support.
+
+---
+
 ### `null` — SQL Null Type Converters
 
 Convert between Go pointer types (`*string`, `*int64`, etc.) and `database/sql` Null types (`sql.NullString`, `sql.NullInt64`, etc.) for nullable database columns.
@@ -28,7 +43,7 @@ nullName = null.ToNullString(nil)    // sql.NullString{Valid: false}
 ptr := null.ToNullStringPointer(nullName) // nil
 ```
 
-**Supported types:** `String`, `Int16`, `Int32`, `Int64`, `Float64`, `Bool`, `Time`, `UUID`, `Date` (string ↔ time.Time)
+**Supported types:** `String`, `Int16`, `Int32`, `Int64`, `Float64`, `Bool`, `Time`, `UUID`, `Date` (string ↔ time.Time), `Decimal`
 
 ---
 
