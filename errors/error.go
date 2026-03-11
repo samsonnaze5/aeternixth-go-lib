@@ -13,6 +13,7 @@ package errors
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // AppError represents a standardized application error that carries both
@@ -172,15 +173,25 @@ func NewAppError(code string, message string, statusCode int) *AppError {
 // Safe for use with package-level error variables (does not mutate the original).
 // The details can be any serializable value (e.g., a map of field errors).
 //
+// If the message contains {key} placeholders and details is a map, the
+// placeholders are automatically replaced with values from the map.
+//
 // Example:
 //
-//	err := errors.NewBadRequest("Invalid input").WithDetails(map[string]string{
-//	    "email": "must be a valid email address",
+//	err := ErrOTPRateLimit.WithDetails(map[string]interface{}{
+//	    "retry_after_seconds": 45,
 //	})
+//	// message: "Please wait before requesting a new OTP (45 Second)."
 func (e *AppError) WithDetails(details interface{}) *AppError {
+	msg := e.Message
+	if m, ok := details.(map[string]interface{}); ok {
+		for k, v := range m {
+			msg = strings.ReplaceAll(msg, "{"+k+"}", fmt.Sprintf("%v", v))
+		}
+	}
 	return &AppError{
 		Code:       e.Code,
-		Message:    e.Message,
+		Message:    msg,
 		Field:      e.Field,
 		Details:    details,
 		StatusCode: e.StatusCode,
