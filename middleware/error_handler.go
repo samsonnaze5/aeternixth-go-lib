@@ -48,10 +48,19 @@ func ErrorHandler() fiber.ErrorHandler {
 
 		// Handle AppError
 		if appErr, ok := err.(*apperrors.AppError); ok {
-			statusCode = appErr.StatusCode
+			// Resolve status: use AppError's own status if set (e.g., NewBadRequest),
+			// otherwise look up from registry (e.g., New(code) from generated errors).
+			if appErr.StatusCode != 0 {
+				statusCode = appErr.StatusCode
+			} else {
+				statusCode = apperrors.GetStatusCode(appErr.Code)
+			}
+
+			// Resolve translated message based on Accept-Language header
+			lang := apperrors.ResolveLanguage(c.Get("Accept-Language"))
 			errorResponse.Error = &apperrors.ErrorInfo{
 				Code:    appErr.Code,
-				Message: appErr.Message,
+				Message: apperrors.ResolveMessage(appErr, lang),
 				Field:   appErr.Field,
 				Details: appErr.Details,
 			}

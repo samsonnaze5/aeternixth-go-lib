@@ -89,8 +89,11 @@ func NoContent(c *fiber.Ctx) error {
 
 // Error sends a standardized error JSON response. It inspects the error type:
 //
-//   - If the error is an *apperrors.AppError, it uses the error's StatusCode,
-//     Code, Message, and Details to build a structured error response.
+//   - If the error is an [apperrors.AppError], it resolves the HTTP status code
+//     (from the AppError itself or from the registry via [apperrors.GetStatusCode]),
+//     resolves the best matching language from the Accept-Language header via
+//     [apperrors.ResolveLanguage], and retrieves the translated message via
+//     [apperrors.ResolveMessage].
 //   - If the error is any other type, it returns a 500 Internal Server Error
 //     with the error's message string as the error message.
 //
@@ -103,11 +106,22 @@ func NoContent(c *fiber.Ctx) error {
 //	// Response (404): { "success": false, "error": { "code": "NOT_FOUND", "message": "user not found" } }
 func Error(c *fiber.Ctx, err error) error {
 	if appErr, ok := err.(*apperrors.AppError); ok {
-		return c.Status(appErr.StatusCode).JSON(apperrors.ErrorResponse{
+		// Resolve status: use AppError's own status if set (e.g., NewBadRequest),
+		// otherwise look up from registry (e.g., New(code) from generated errors).
+		statusCode := appErr.StatusCode
+		if statusCode == 0 {
+			statusCode = apperrors.GetStatusCode(appErr.Code)
+		}
+
+		// Resolve translated message based on Accept-Language header
+		lang := apperrors.ResolveLanguage(c.Get("Accept-Language"))
+
+		return c.Status(statusCode).JSON(apperrors.ErrorResponse{
 			Success: false,
 			Error: &apperrors.ErrorInfo{
 				Code:    appErr.Code,
-				Message: appErr.Message,
+				Message: apperrors.ResolveMessage(appErr, lang),
+				Field:   appErr.Field,
 				Details: appErr.Details,
 			},
 			Data: nil,

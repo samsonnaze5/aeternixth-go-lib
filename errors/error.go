@@ -13,7 +13,6 @@ package errors
 import (
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 // AppError represents a standardized application error that carries both
@@ -41,12 +40,15 @@ type AppError struct {
 }
 
 // Error implements the built-in error interface. It returns a formatted
-// string in the format "[CODE] message", which is useful for logging
-// and error wrapping.
+// string containing the error code and message (if present), which is
+// useful for logging and error wrapping.
 //
 // Example output: "[NOT_FOUND] User with ID 123 was not found"
 func (e *AppError) Error() string {
-	return fmt.Sprintf("[%s] %s", e.Code, e.Message)
+	if e.Message != "" {
+		return fmt.Sprintf("[%s] %s", e.Code, e.Message)
+	}
+	return fmt.Sprintf("[%s]", e.Code)
 }
 
 // ErrorResponse represents the standardized JSON error response envelope
@@ -139,19 +141,24 @@ func RegisterCodes(codes map[string]int) {
 	}
 }
 
-// New creates an AppError using the registry for HTTP status lookup.
-// The code must have been registered via RegisterCodes; if not found,
-// the status defaults to 500 (Internal Server Error).
+// New creates an AppError with the given error code. The HTTP status code
+// and translated message are resolved later by the middleware at response
+// time using the registries populated via RegisterCodes and RegisterTranslations.
 //
 // Example:
 //
-//	var ErrInvalidCredentials = errors.New("AUTH_LOGIN_INVALID_CREDENTIALS", "INVALID_EMAIL_OR_PASSWORD")
-func New(code string, message string) *AppError {
-	status, ok := registry[code]
-	if !ok {
-		status = 500
+//	var ErrInvalidCredentials = errors.New("AUTH_LOGIN_INVALID_CREDENTIALS")
+func New(code string) *AppError {
+	return &AppError{Code: code}
+}
+
+// GetStatusCode returns the HTTP status code for the given error code
+// from the registry. Returns 500 if the code is not registered.
+func GetStatusCode(code string) int {
+	if status, ok := registry[code]; ok {
+		return status
 	}
-	return &AppError{Code: code, Message: message, StatusCode: status}
+	return http.StatusInternalServerError
 }
 
 // NewAppError creates a new AppError with the given error code, human-readable
@@ -173,25 +180,18 @@ func NewAppError(code string, message string, statusCode int) *AppError {
 // Safe for use with package-level error variables (does not mutate the original).
 // The details can be any serializable value (e.g., a map of field errors).
 //
-// If the message contains {key} placeholders and details is a map, the
-// placeholders are automatically replaced with values from the map.
+// For errors with {placeholder} templates in translations, the middleware
+// resolves placeholders from the details map at response time via ResolveMessage.
 //
 // Example:
 //
 //	err := ErrOTPRateLimit.WithDetails(map[string]interface{}{
 //	    "retry_after_seconds": 45,
 //	})
-//	// message: "Please wait before requesting a new OTP (45 Second)."
 func (e *AppError) WithDetails(details interface{}) *AppError {
-	msg := e.Message
-	if m, ok := details.(map[string]interface{}); ok {
-		for k, v := range m {
-			msg = strings.ReplaceAll(msg, "{"+k+"}", fmt.Sprintf("%v", v))
-		}
-	}
 	return &AppError{
 		Code:       e.Code,
-		Message:    msg,
+		Message:    e.Message,
 		Field:      e.Field,
 		Details:    details,
 		StatusCode: e.StatusCode,
