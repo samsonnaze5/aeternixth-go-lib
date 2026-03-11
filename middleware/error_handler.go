@@ -52,6 +52,7 @@ func ErrorHandler() fiber.ErrorHandler {
 			errorResponse.Error = &apperrors.ErrorInfo{
 				Code:    appErr.Code,
 				Message: appErr.Message,
+				Field:   appErr.Field,
 				Details: appErr.Details,
 			}
 		} else if fiberErr, ok := err.(*fiber.Error); ok {

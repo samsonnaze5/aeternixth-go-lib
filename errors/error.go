@@ -34,6 +34,7 @@ import (
 type AppError struct {
 	Code       string      `json:"code"`
 	Message    string      `json:"message"`
+	Field      string      `json:"field,omitempty"`
 	Details    interface{} `json:"details,omitempty"`
 	StatusCode int         `json:"-"`
 }
@@ -70,6 +71,7 @@ type ErrorResponse struct {
 type ErrorInfo struct {
 	Code    string      `json:"code"`
 	Message string      `json:"message"`
+	Field   string      `json:"field,omitempty"`
 	Details interface{} `json:"details,omitempty"`
 }
 
@@ -117,6 +119,40 @@ const (
 	ErrCodeExternalServiceError = "EXTERNAL_SERVICE_ERROR"
 )
 
+// registry maps error codes to HTTP status codes. Populated at startup
+// via RegisterCodes so that New() can resolve status automatically.
+var registry = map[string]int{}
+
+// RegisterCodes registers error codes with their HTTP status codes.
+// Must be called during application startup before any errors are returned.
+//
+// Example:
+//
+//	errors.RegisterCodes(map[string]int{
+//	    "AUTH_LOGIN_INVALID_CREDENTIALS": 401,
+//	    "IB_WALLET_NOT_FOUND":           404,
+//	})
+func RegisterCodes(codes map[string]int) {
+	for k, v := range codes {
+		registry[k] = v
+	}
+}
+
+// New creates an AppError using the registry for HTTP status lookup.
+// The code must have been registered via RegisterCodes; if not found,
+// the status defaults to 500 (Internal Server Error).
+//
+// Example:
+//
+//	var ErrInvalidCredentials = errors.New("AUTH_LOGIN_INVALID_CREDENTIALS", "INVALID_EMAIL_OR_PASSWORD")
+func New(code string, message string) *AppError {
+	status, ok := registry[code]
+	if !ok {
+		status = 500
+	}
+	return &AppError{Code: code, Message: message, StatusCode: status}
+}
+
 // NewAppError creates a new AppError with the given error code, human-readable
 // message, and HTTP status code. This is the base constructor — use the
 // convenience functions (NewBadRequest, NewNotFound, etc.) for common cases.
@@ -132,11 +168,9 @@ func NewAppError(code string, message string, statusCode int) *AppError {
 	}
 }
 
-// WithDetails attaches additional context to the AppError and returns the
-// same pointer for method chaining. The details can be any serializable
-// value (e.g., a map of field errors, a list of validation messages, or
-// a structured error object). It will be included in the JSON response
-// under the "details" key.
+// WithDetails returns a copy of the AppError with the given details attached.
+// Safe for use with package-level error variables (does not mutate the original).
+// The details can be any serializable value (e.g., a map of field errors).
 //
 // Example:
 //
@@ -144,8 +178,30 @@ func NewAppError(code string, message string, statusCode int) *AppError {
 //	    "email": "must be a valid email address",
 //	})
 func (e *AppError) WithDetails(details interface{}) *AppError {
-	e.Details = details
-	return e
+	return &AppError{
+		Code:       e.Code,
+		Message:    e.Message,
+		Field:      e.Field,
+		Details:    details,
+		StatusCode: e.StatusCode,
+	}
+}
+
+// WithField returns a copy of the AppError with the field name set.
+// Safe for use with package-level error variables (does not mutate the original).
+// The field indicates which request field caused the error (e.g., "email", "password").
+//
+// Example:
+//
+//	return ErrInvalidCredentials.WithField("email")
+func (e *AppError) WithField(field string) *AppError {
+	return &AppError{
+		Code:       e.Code,
+		Message:    e.Message,
+		Field:      field,
+		Details:    e.Details,
+		StatusCode: e.StatusCode,
+	}
 }
 
 // NewBadRequest creates an AppError with code "BAD_REQUEST" and HTTP status 400.
