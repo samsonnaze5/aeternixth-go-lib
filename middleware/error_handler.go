@@ -20,8 +20,8 @@ import (
 //     The status code is taken from the Fiber error and mapped to an error code via
 //     [getErrorCodeFromStatus].
 //   - All other errors — treated as unexpected internal server errors. The error message
-//     is logged and a generic "An unexpected error occurred" message is returned to the client,
-//     with the original error string included in the Details field for debugging.
+//     is logged server-side and a generic "An unexpected error occurred" message is returned
+//     to the client without exposing internal error details.
 //
 // Server errors (status >= 500) are additionally logged with the HTTP method, path, and
 // status code for observability.
@@ -72,9 +72,8 @@ func ErrorHandler() fiber.ErrorHandler {
 				Message: fiberErr.Message,
 			}
 		} else {
-			// Handle unexpected errors
+			// Handle unexpected errors — log raw error but do NOT expose to client
 			log.Printf("Unexpected error: %v", err)
-			errorResponse.Error.Details = err.Error()
 		}
 
 		// Log errors (except client errors)
