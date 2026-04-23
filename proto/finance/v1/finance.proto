@@ -2,6 +2,30 @@ syntax = "proto3";
 package finance.v1;
 option go_package = "github.com/samsonnaze5/aeternixth-go-lib/finance/v1;financev1";
 
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// --- Shared Enums ---
+
+enum AccountType {
+  ACCOUNT_TYPE_UNSPECIFIED = 0;
+  TRADING = 1;
+  WALLET = 2;
+}
+
+enum TransactionStatus {
+  TRANSACTION_STATUS_UNSPECIFIED = 0;
+  PENDING = 1;
+  APPROVED = 2;
+  PROCESSING = 3;
+  COMPLETED = 4;
+  FAILED = 5;
+  CANCELLED = 6;
+  EXPIRED = 7;
+  REJECTED = 8;
+  REFUNDED = 9;
+}
+
 // PSP config resolved by CRM, passed per-request
 message PspConfig {
   string provider_code = 1;
@@ -13,7 +37,7 @@ message PspConfig {
 // --- Deposit ---
 message CreateDepositRequest {
   string user_id = 1;
-  string dest_type = 2;      // TRADING | WALLET
+  AccountType dest_type = 2;
   string dest_id = 3;
   string amount_usd = 4;
   string offer_rate = 5;
@@ -21,7 +45,7 @@ message CreateDepositRequest {
   PspConfig psp_config = 7;
   string idempotency_key = 8;
   int64 mt5_login = 9;
-  string expires_at = 10;
+  google.protobuf.Timestamp expires_at = 10;
 }
 
 message CreateDepositResponse {
@@ -30,13 +54,13 @@ message CreateDepositResponse {
   string qr_code_base64 = 3;
   string payment_url = 4;
   string psp_transaction_id = 5;
-  string status = 6;
+  TransactionStatus status = 6;
 }
 
 // --- Withdraw ---
 message CreateWithdrawRequest {
   string user_id = 1;
-  string source_type = 2;
+  AccountType source_type = 2;
   string source_id = 3;
   string amount_usd = 4;
   string bid_rate = 5;
@@ -45,13 +69,13 @@ message CreateWithdrawRequest {
   PspConfig psp_config = 8;
   string idempotency_key = 9;
   int64 mt5_login = 10;
-  string expires_at = 11;
+  google.protobuf.Timestamp expires_at = 11;
 }
 
 message CreateWithdrawResponse {
   string txn_id = 1;
   string reference_id = 2;
-  string status = 3;
+  TransactionStatus status = 3;
 }
 
 message ApproveWithdrawRequest {
@@ -60,9 +84,8 @@ message ApproveWithdrawRequest {
 }
 
 message ApproveWithdrawResponse {
-  string status = 1;          // COMPLETED | PROCESSING | FAILED
+  TransactionStatus status = 1;
   string psp_transaction_id = 2;
-  string error_message = 3;
 }
 
 message RejectWithdrawRequest {
@@ -77,17 +100,12 @@ message RefundWithdrawRequest {
   string reason = 3;
 }
 
-message StatusResponse {
-  bool success = 1;
-  string message = 2;
-}
-
 // --- Internal Transfer ---
 message CreateTransferRequest {
   string user_id = 1;
-  string source_type = 2;
+  AccountType source_type = 2;
   string source_id = 3;
-  string dest_type = 4;
+  AccountType dest_type = 4;
   string dest_id = 5;
   string amount_usd = 6;
   string idempotency_key = 7;
@@ -95,7 +113,7 @@ message CreateTransferRequest {
 
 message CreateTransferResponse {
   string txn_id = 1;
-  string status = 2;
+  TransactionStatus status = 2;
 }
 
 // --- Service ---
@@ -103,7 +121,7 @@ service FinanceService {
   rpc CreateDeposit(CreateDepositRequest) returns (CreateDepositResponse);
   rpc CreateWithdraw(CreateWithdrawRequest) returns (CreateWithdrawResponse);
   rpc ApproveWithdraw(ApproveWithdrawRequest) returns (ApproveWithdrawResponse);
-  rpc RejectWithdraw(RejectWithdrawRequest) returns (StatusResponse);
-  rpc RefundWithdraw(RefundWithdrawRequest) returns (StatusResponse);
+  rpc RejectWithdraw(RejectWithdrawRequest) returns (google.protobuf.Empty);
+  rpc RefundWithdraw(RefundWithdrawRequest) returns (google.protobuf.Empty);
   rpc CreateTransfer(CreateTransferRequest) returns (CreateTransferResponse);
 }

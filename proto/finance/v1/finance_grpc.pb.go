@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -36,8 +37,8 @@ type FinanceServiceClient interface {
 	CreateDeposit(ctx context.Context, in *CreateDepositRequest, opts ...grpc.CallOption) (*CreateDepositResponse, error)
 	CreateWithdraw(ctx context.Context, in *CreateWithdrawRequest, opts ...grpc.CallOption) (*CreateWithdrawResponse, error)
 	ApproveWithdraw(ctx context.Context, in *ApproveWithdrawRequest, opts ...grpc.CallOption) (*ApproveWithdrawResponse, error)
-	RejectWithdraw(ctx context.Context, in *RejectWithdrawRequest, opts ...grpc.CallOption) (*StatusResponse, error)
-	RefundWithdraw(ctx context.Context, in *RefundWithdrawRequest, opts ...grpc.CallOption) (*StatusResponse, error)
+	RejectWithdraw(ctx context.Context, in *RejectWithdrawRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	RefundWithdraw(ctx context.Context, in *RefundWithdrawRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	CreateTransfer(ctx context.Context, in *CreateTransferRequest, opts ...grpc.CallOption) (*CreateTransferResponse, error)
 }
 
@@ -79,9 +80,9 @@ func (c *financeServiceClient) ApproveWithdraw(ctx context.Context, in *ApproveW
 	return out, nil
 }
 
-func (c *financeServiceClient) RejectWithdraw(ctx context.Context, in *RejectWithdrawRequest, opts ...grpc.CallOption) (*StatusResponse, error) {
+func (c *financeServiceClient) RejectWithdraw(ctx context.Context, in *RejectWithdrawRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(StatusResponse)
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, FinanceService_RejectWithdraw_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -89,9 +90,9 @@ func (c *financeServiceClient) RejectWithdraw(ctx context.Context, in *RejectWit
 	return out, nil
 }
 
-func (c *financeServiceClient) RefundWithdraw(ctx context.Context, in *RefundWithdrawRequest, opts ...grpc.CallOption) (*StatusResponse, error) {
+func (c *financeServiceClient) RefundWithdraw(ctx context.Context, in *RefundWithdrawRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(StatusResponse)
+	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, FinanceService_RefundWithdraw_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -118,8 +119,8 @@ type FinanceServiceServer interface {
 	CreateDeposit(context.Context, *CreateDepositRequest) (*CreateDepositResponse, error)
 	CreateWithdraw(context.Context, *CreateWithdrawRequest) (*CreateWithdrawResponse, error)
 	ApproveWithdraw(context.Context, *ApproveWithdrawRequest) (*ApproveWithdrawResponse, error)
-	RejectWithdraw(context.Context, *RejectWithdrawRequest) (*StatusResponse, error)
-	RefundWithdraw(context.Context, *RefundWithdrawRequest) (*StatusResponse, error)
+	RejectWithdraw(context.Context, *RejectWithdrawRequest) (*emptypb.Empty, error)
+	RefundWithdraw(context.Context, *RefundWithdrawRequest) (*emptypb.Empty, error)
 	CreateTransfer(context.Context, *CreateTransferRequest) (*CreateTransferResponse, error)
 	mustEmbedUnimplementedFinanceServiceServer()
 }
@@ -140,10 +141,10 @@ func (UnimplementedFinanceServiceServer) CreateWithdraw(context.Context, *Create
 func (UnimplementedFinanceServiceServer) ApproveWithdraw(context.Context, *ApproveWithdrawRequest) (*ApproveWithdrawResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method ApproveWithdraw not implemented")
 }
-func (UnimplementedFinanceServiceServer) RejectWithdraw(context.Context, *RejectWithdrawRequest) (*StatusResponse, error) {
+func (UnimplementedFinanceServiceServer) RejectWithdraw(context.Context, *RejectWithdrawRequest) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method RejectWithdraw not implemented")
 }
-func (UnimplementedFinanceServiceServer) RefundWithdraw(context.Context, *RefundWithdrawRequest) (*StatusResponse, error) {
+func (UnimplementedFinanceServiceServer) RefundWithdraw(context.Context, *RefundWithdrawRequest) (*emptypb.Empty, error) {
 	return nil, status.Error(codes.Unimplemented, "method RefundWithdraw not implemented")
 }
 func (UnimplementedFinanceServiceServer) CreateTransfer(context.Context, *CreateTransferRequest) (*CreateTransferResponse, error) {

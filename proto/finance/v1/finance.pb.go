@@ -9,6 +9,8 @@ package financev1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -20,6 +22,125 @@ const (
 	// Verify that runtime/protoimpl is sufficiently up-to-date.
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
+
+type AccountType int32
+
+const (
+	AccountType_ACCOUNT_TYPE_UNSPECIFIED AccountType = 0
+	AccountType_TRADING                  AccountType = 1
+	AccountType_WALLET                   AccountType = 2
+)
+
+// Enum value maps for AccountType.
+var (
+	AccountType_name = map[int32]string{
+		0: "ACCOUNT_TYPE_UNSPECIFIED",
+		1: "TRADING",
+		2: "WALLET",
+	}
+	AccountType_value = map[string]int32{
+		"ACCOUNT_TYPE_UNSPECIFIED": 0,
+		"TRADING":                  1,
+		"WALLET":                   2,
+	}
+)
+
+func (x AccountType) Enum() *AccountType {
+	p := new(AccountType)
+	*p = x
+	return p
+}
+
+func (x AccountType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (AccountType) Descriptor() protoreflect.EnumDescriptor {
+	return file_proto_finance_v1_finance_proto_enumTypes[0].Descriptor()
+}
+
+func (AccountType) Type() protoreflect.EnumType {
+	return &file_proto_finance_v1_finance_proto_enumTypes[0]
+}
+
+func (x AccountType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use AccountType.Descriptor instead.
+func (AccountType) EnumDescriptor() ([]byte, []int) {
+	return file_proto_finance_v1_finance_proto_rawDescGZIP(), []int{0}
+}
+
+type TransactionStatus int32
+
+const (
+	TransactionStatus_TRANSACTION_STATUS_UNSPECIFIED TransactionStatus = 0
+	TransactionStatus_PENDING                        TransactionStatus = 1
+	TransactionStatus_APPROVED                       TransactionStatus = 2
+	TransactionStatus_PROCESSING                     TransactionStatus = 3
+	TransactionStatus_COMPLETED                      TransactionStatus = 4
+	TransactionStatus_FAILED                         TransactionStatus = 5
+	TransactionStatus_CANCELLED                      TransactionStatus = 6
+	TransactionStatus_EXPIRED                        TransactionStatus = 7
+	TransactionStatus_REJECTED                       TransactionStatus = 8
+	TransactionStatus_REFUNDED                       TransactionStatus = 9
+)
+
+// Enum value maps for TransactionStatus.
+var (
+	TransactionStatus_name = map[int32]string{
+		0: "TRANSACTION_STATUS_UNSPECIFIED",
+		1: "PENDING",
+		2: "APPROVED",
+		3: "PROCESSING",
+		4: "COMPLETED",
+		5: "FAILED",
+		6: "CANCELLED",
+		7: "EXPIRED",
+		8: "REJECTED",
+		9: "REFUNDED",
+	}
+	TransactionStatus_value = map[string]int32{
+		"TRANSACTION_STATUS_UNSPECIFIED": 0,
+		"PENDING":                        1,
+		"APPROVED":                       2,
+		"PROCESSING":                     3,
+		"COMPLETED":                      4,
+		"FAILED":                         5,
+		"CANCELLED":                      6,
+		"EXPIRED":                        7,
+		"REJECTED":                       8,
+		"REFUNDED":                       9,
+	}
+)
+
+func (x TransactionStatus) Enum() *TransactionStatus {
+	p := new(TransactionStatus)
+	*p = x
+	return p
+}
+
+func (x TransactionStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (TransactionStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_proto_finance_v1_finance_proto_enumTypes[1].Descriptor()
+}
+
+func (TransactionStatus) Type() protoreflect.EnumType {
+	return &file_proto_finance_v1_finance_proto_enumTypes[1]
+}
+
+func (x TransactionStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use TransactionStatus.Descriptor instead.
+func (TransactionStatus) EnumDescriptor() ([]byte, []int) {
+	return file_proto_finance_v1_finance_proto_rawDescGZIP(), []int{1}
+}
 
 // PSP config resolved by CRM, passed per-request
 type PspConfig struct {
@@ -94,7 +215,7 @@ func (x *PspConfig) GetMetadata() map[string]string {
 type CreateDepositRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	UserId         string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	DestType       string                 `protobuf:"bytes,2,opt,name=dest_type,json=destType,proto3" json:"dest_type,omitempty"` // TRADING | WALLET
+	DestType       AccountType            `protobuf:"varint,2,opt,name=dest_type,json=destType,proto3,enum=finance.v1.AccountType" json:"dest_type,omitempty"`
 	DestId         string                 `protobuf:"bytes,3,opt,name=dest_id,json=destId,proto3" json:"dest_id,omitempty"`
 	AmountUsd      string                 `protobuf:"bytes,4,opt,name=amount_usd,json=amountUsd,proto3" json:"amount_usd,omitempty"`
 	OfferRate      string                 `protobuf:"bytes,5,opt,name=offer_rate,json=offerRate,proto3" json:"offer_rate,omitempty"`
@@ -102,7 +223,7 @@ type CreateDepositRequest struct {
 	PspConfig      *PspConfig             `protobuf:"bytes,7,opt,name=psp_config,json=pspConfig,proto3" json:"psp_config,omitempty"`
 	IdempotencyKey string                 `protobuf:"bytes,8,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
 	Mt5Login       int64                  `protobuf:"varint,9,opt,name=mt5_login,json=mt5Login,proto3" json:"mt5_login,omitempty"`
-	ExpiresAt      string                 `protobuf:"bytes,10,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	ExpiresAt      *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -144,11 +265,11 @@ func (x *CreateDepositRequest) GetUserId() string {
 	return ""
 }
 
-func (x *CreateDepositRequest) GetDestType() string {
+func (x *CreateDepositRequest) GetDestType() AccountType {
 	if x != nil {
 		return x.DestType
 	}
-	return ""
+	return AccountType_ACCOUNT_TYPE_UNSPECIFIED
 }
 
 func (x *CreateDepositRequest) GetDestId() string {
@@ -200,11 +321,11 @@ func (x *CreateDepositRequest) GetMt5Login() int64 {
 	return 0
 }
 
-func (x *CreateDepositRequest) GetExpiresAt() string {
+func (x *CreateDepositRequest) GetExpiresAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.ExpiresAt
 	}
-	return ""
+	return nil
 }
 
 type CreateDepositResponse struct {
@@ -214,7 +335,7 @@ type CreateDepositResponse struct {
 	QrCodeBase64     string                 `protobuf:"bytes,3,opt,name=qr_code_base64,json=qrCodeBase64,proto3" json:"qr_code_base64,omitempty"`
 	PaymentUrl       string                 `protobuf:"bytes,4,opt,name=payment_url,json=paymentUrl,proto3" json:"payment_url,omitempty"`
 	PspTransactionId string                 `protobuf:"bytes,5,opt,name=psp_transaction_id,json=pspTransactionId,proto3" json:"psp_transaction_id,omitempty"`
-	Status           string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
+	Status           TransactionStatus      `protobuf:"varint,6,opt,name=status,proto3,enum=finance.v1.TransactionStatus" json:"status,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -284,18 +405,18 @@ func (x *CreateDepositResponse) GetPspTransactionId() string {
 	return ""
 }
 
-func (x *CreateDepositResponse) GetStatus() string {
+func (x *CreateDepositResponse) GetStatus() TransactionStatus {
 	if x != nil {
 		return x.Status
 	}
-	return ""
+	return TransactionStatus_TRANSACTION_STATUS_UNSPECIFIED
 }
 
 // --- Withdraw ---
 type CreateWithdrawRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	UserId          string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	SourceType      string                 `protobuf:"bytes,2,opt,name=source_type,json=sourceType,proto3" json:"source_type,omitempty"`
+	SourceType      AccountType            `protobuf:"varint,2,opt,name=source_type,json=sourceType,proto3,enum=finance.v1.AccountType" json:"source_type,omitempty"`
 	SourceId        string                 `protobuf:"bytes,3,opt,name=source_id,json=sourceId,proto3" json:"source_id,omitempty"`
 	AmountUsd       string                 `protobuf:"bytes,4,opt,name=amount_usd,json=amountUsd,proto3" json:"amount_usd,omitempty"`
 	BidRate         string                 `protobuf:"bytes,5,opt,name=bid_rate,json=bidRate,proto3" json:"bid_rate,omitempty"`
@@ -304,7 +425,7 @@ type CreateWithdrawRequest struct {
 	PspConfig       *PspConfig             `protobuf:"bytes,8,opt,name=psp_config,json=pspConfig,proto3" json:"psp_config,omitempty"`
 	IdempotencyKey  string                 `protobuf:"bytes,9,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
 	Mt5Login        int64                  `protobuf:"varint,10,opt,name=mt5_login,json=mt5Login,proto3" json:"mt5_login,omitempty"`
-	ExpiresAt       string                 `protobuf:"bytes,11,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	ExpiresAt       *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -346,11 +467,11 @@ func (x *CreateWithdrawRequest) GetUserId() string {
 	return ""
 }
 
-func (x *CreateWithdrawRequest) GetSourceType() string {
+func (x *CreateWithdrawRequest) GetSourceType() AccountType {
 	if x != nil {
 		return x.SourceType
 	}
-	return ""
+	return AccountType_ACCOUNT_TYPE_UNSPECIFIED
 }
 
 func (x *CreateWithdrawRequest) GetSourceId() string {
@@ -409,18 +530,18 @@ func (x *CreateWithdrawRequest) GetMt5Login() int64 {
 	return 0
 }
 
-func (x *CreateWithdrawRequest) GetExpiresAt() string {
+func (x *CreateWithdrawRequest) GetExpiresAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.ExpiresAt
 	}
-	return ""
+	return nil
 }
 
 type CreateWithdrawResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TxnId         string                 `protobuf:"bytes,1,opt,name=txn_id,json=txnId,proto3" json:"txn_id,omitempty"`
 	ReferenceId   string                 `protobuf:"bytes,2,opt,name=reference_id,json=referenceId,proto3" json:"reference_id,omitempty"`
-	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+	Status        TransactionStatus      `protobuf:"varint,3,opt,name=status,proto3,enum=finance.v1.TransactionStatus" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -469,11 +590,11 @@ func (x *CreateWithdrawResponse) GetReferenceId() string {
 	return ""
 }
 
-func (x *CreateWithdrawResponse) GetStatus() string {
+func (x *CreateWithdrawResponse) GetStatus() TransactionStatus {
 	if x != nil {
 		return x.Status
 	}
-	return ""
+	return TransactionStatus_TRANSACTION_STATUS_UNSPECIFIED
 }
 
 type ApproveWithdrawRequest struct {
@@ -530,9 +651,8 @@ func (x *ApproveWithdrawRequest) GetAdminId() string {
 
 type ApproveWithdrawResponse struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
-	Status           string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"` // COMPLETED | PROCESSING | FAILED
+	Status           TransactionStatus      `protobuf:"varint,1,opt,name=status,proto3,enum=finance.v1.TransactionStatus" json:"status,omitempty"`
 	PspTransactionId string                 `protobuf:"bytes,2,opt,name=psp_transaction_id,json=pspTransactionId,proto3" json:"psp_transaction_id,omitempty"`
-	ErrorMessage     string                 `protobuf:"bytes,3,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -567,23 +687,16 @@ func (*ApproveWithdrawResponse) Descriptor() ([]byte, []int) {
 	return file_proto_finance_v1_finance_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *ApproveWithdrawResponse) GetStatus() string {
+func (x *ApproveWithdrawResponse) GetStatus() TransactionStatus {
 	if x != nil {
 		return x.Status
 	}
-	return ""
+	return TransactionStatus_TRANSACTION_STATUS_UNSPECIFIED
 }
 
 func (x *ApproveWithdrawResponse) GetPspTransactionId() string {
 	if x != nil {
 		return x.PspTransactionId
-	}
-	return ""
-}
-
-func (x *ApproveWithdrawResponse) GetErrorMessage() string {
-	if x != nil {
-		return x.ErrorMessage
 	}
 	return ""
 }
@@ -708,65 +821,13 @@ func (x *RefundWithdrawRequest) GetReason() string {
 	return ""
 }
 
-type StatusResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *StatusResponse) Reset() {
-	*x = StatusResponse{}
-	mi := &file_proto_finance_v1_finance_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *StatusResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*StatusResponse) ProtoMessage() {}
-
-func (x *StatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_finance_v1_finance_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use StatusResponse.ProtoReflect.Descriptor instead.
-func (*StatusResponse) Descriptor() ([]byte, []int) {
-	return file_proto_finance_v1_finance_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *StatusResponse) GetSuccess() bool {
-	if x != nil {
-		return x.Success
-	}
-	return false
-}
-
-func (x *StatusResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
 // --- Internal Transfer ---
 type CreateTransferRequest struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	UserId         string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	SourceType     string                 `protobuf:"bytes,2,opt,name=source_type,json=sourceType,proto3" json:"source_type,omitempty"`
+	SourceType     AccountType            `protobuf:"varint,2,opt,name=source_type,json=sourceType,proto3,enum=finance.v1.AccountType" json:"source_type,omitempty"`
 	SourceId       string                 `protobuf:"bytes,3,opt,name=source_id,json=sourceId,proto3" json:"source_id,omitempty"`
-	DestType       string                 `protobuf:"bytes,4,opt,name=dest_type,json=destType,proto3" json:"dest_type,omitempty"`
+	DestType       AccountType            `protobuf:"varint,4,opt,name=dest_type,json=destType,proto3,enum=finance.v1.AccountType" json:"dest_type,omitempty"`
 	DestId         string                 `protobuf:"bytes,5,opt,name=dest_id,json=destId,proto3" json:"dest_id,omitempty"`
 	AmountUsd      string                 `protobuf:"bytes,6,opt,name=amount_usd,json=amountUsd,proto3" json:"amount_usd,omitempty"`
 	IdempotencyKey string                 `protobuf:"bytes,7,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
@@ -776,7 +837,7 @@ type CreateTransferRequest struct {
 
 func (x *CreateTransferRequest) Reset() {
 	*x = CreateTransferRequest{}
-	mi := &file_proto_finance_v1_finance_proto_msgTypes[10]
+	mi := &file_proto_finance_v1_finance_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -788,7 +849,7 @@ func (x *CreateTransferRequest) String() string {
 func (*CreateTransferRequest) ProtoMessage() {}
 
 func (x *CreateTransferRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_finance_v1_finance_proto_msgTypes[10]
+	mi := &file_proto_finance_v1_finance_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -801,7 +862,7 @@ func (x *CreateTransferRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTransferRequest.ProtoReflect.Descriptor instead.
 func (*CreateTransferRequest) Descriptor() ([]byte, []int) {
-	return file_proto_finance_v1_finance_proto_rawDescGZIP(), []int{10}
+	return file_proto_finance_v1_finance_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *CreateTransferRequest) GetUserId() string {
@@ -811,11 +872,11 @@ func (x *CreateTransferRequest) GetUserId() string {
 	return ""
 }
 
-func (x *CreateTransferRequest) GetSourceType() string {
+func (x *CreateTransferRequest) GetSourceType() AccountType {
 	if x != nil {
 		return x.SourceType
 	}
-	return ""
+	return AccountType_ACCOUNT_TYPE_UNSPECIFIED
 }
 
 func (x *CreateTransferRequest) GetSourceId() string {
@@ -825,11 +886,11 @@ func (x *CreateTransferRequest) GetSourceId() string {
 	return ""
 }
 
-func (x *CreateTransferRequest) GetDestType() string {
+func (x *CreateTransferRequest) GetDestType() AccountType {
 	if x != nil {
 		return x.DestType
 	}
-	return ""
+	return AccountType_ACCOUNT_TYPE_UNSPECIFIED
 }
 
 func (x *CreateTransferRequest) GetDestId() string {
@@ -856,14 +917,14 @@ func (x *CreateTransferRequest) GetIdempotencyKey() string {
 type CreateTransferResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TxnId         string                 `protobuf:"bytes,1,opt,name=txn_id,json=txnId,proto3" json:"txn_id,omitempty"`
-	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`
+	Status        TransactionStatus      `protobuf:"varint,2,opt,name=status,proto3,enum=finance.v1.TransactionStatus" json:"status,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateTransferResponse) Reset() {
 	*x = CreateTransferResponse{}
-	mi := &file_proto_finance_v1_finance_proto_msgTypes[11]
+	mi := &file_proto_finance_v1_finance_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -875,7 +936,7 @@ func (x *CreateTransferResponse) String() string {
 func (*CreateTransferResponse) ProtoMessage() {}
 
 func (x *CreateTransferResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_finance_v1_finance_proto_msgTypes[11]
+	mi := &file_proto_finance_v1_finance_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -888,7 +949,7 @@ func (x *CreateTransferResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateTransferResponse.ProtoReflect.Descriptor instead.
 func (*CreateTransferResponse) Descriptor() ([]byte, []int) {
-	return file_proto_finance_v1_finance_proto_rawDescGZIP(), []int{11}
+	return file_proto_finance_v1_finance_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *CreateTransferResponse) GetTxnId() string {
@@ -898,11 +959,11 @@ func (x *CreateTransferResponse) GetTxnId() string {
 	return ""
 }
 
-func (x *CreateTransferResponse) GetStatus() string {
+func (x *CreateTransferResponse) GetStatus() TransactionStatus {
 	if x != nil {
 		return x.Status
 	}
-	return ""
+	return TransactionStatus_TRANSACTION_STATUS_UNSPECIFIED
 }
 
 var File_proto_finance_v1_finance_proto protoreflect.FileDescriptor
@@ -910,7 +971,7 @@ var File_proto_finance_v1_finance_proto protoreflect.FileDescriptor
 const file_proto_finance_v1_finance_proto_rawDesc = "" +
 	"\n" +
 	"\x1eproto/finance/v1/finance.proto\x12\n" +
-	"finance.v1\"\xfa\x01\n" +
+	"finance.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\"\xfa\x01\n" +
 	"\tPspConfig\x12#\n" +
 	"\rprovider_code\x18\x01 \x01(\tR\fproviderCode\x12\x1f\n" +
 	"\vmethod_type\x18\x02 \x01(\tR\n" +
@@ -919,10 +980,10 @@ const file_proto_finance_v1_finance_proto_rawDesc = "" +
 	"\bmetadata\x18\x04 \x03(\v2#.finance.v1.PspConfig.MetadataEntryR\bmetadata\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xe5\x02\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x9a\x03\n" +
 	"\x14CreateDepositRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
-	"\tdest_type\x18\x02 \x01(\tR\bdestType\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x124\n" +
+	"\tdest_type\x18\x02 \x01(\x0e2\x17.finance.v1.AccountTypeR\bdestType\x12\x17\n" +
 	"\adest_id\x18\x03 \x01(\tR\x06destId\x12\x1d\n" +
 	"\n" +
 	"amount_usd\x18\x04 \x01(\tR\tamountUsd\x12\x1d\n" +
@@ -932,21 +993,21 @@ const file_proto_finance_v1_finance_proto_rawDesc = "" +
 	"\n" +
 	"psp_config\x18\a \x01(\v2\x15.finance.v1.PspConfigR\tpspConfig\x12'\n" +
 	"\x0fidempotency_key\x18\b \x01(\tR\x0eidempotencyKey\x12\x1b\n" +
-	"\tmt5_login\x18\t \x01(\x03R\bmt5Login\x12\x1d\n" +
+	"\tmt5_login\x18\t \x01(\x03R\bmt5Login\x129\n" +
 	"\n" +
 	"expires_at\x18\n" +
-	" \x01(\tR\texpiresAt\"\xde\x01\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\"\xfd\x01\n" +
 	"\x15CreateDepositResponse\x12\x15\n" +
 	"\x06txn_id\x18\x01 \x01(\tR\x05txnId\x12!\n" +
 	"\freference_id\x18\x02 \x01(\tR\vreferenceId\x12$\n" +
 	"\x0eqr_code_base64\x18\x03 \x01(\tR\fqrCodeBase64\x12\x1f\n" +
 	"\vpayment_url\x18\x04 \x01(\tR\n" +
 	"paymentUrl\x12,\n" +
-	"\x12psp_transaction_id\x18\x05 \x01(\tR\x10pspTransactionId\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\"\x93\x03\n" +
+	"\x12psp_transaction_id\x18\x05 \x01(\tR\x10pspTransactionId\x125\n" +
+	"\x06status\x18\x06 \x01(\x0e2\x1d.finance.v1.TransactionStatusR\x06status\"\xc8\x03\n" +
 	"\x15CreateWithdrawRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1f\n" +
-	"\vsource_type\x18\x02 \x01(\tR\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x128\n" +
+	"\vsource_type\x18\x02 \x01(\x0e2\x17.finance.v1.AccountTypeR\n" +
 	"sourceType\x12\x1b\n" +
 	"\tsource_id\x18\x03 \x01(\tR\bsourceId\x12\x1d\n" +
 	"\n" +
@@ -958,20 +1019,19 @@ const file_proto_finance_v1_finance_proto_rawDesc = "" +
 	"psp_config\x18\b \x01(\v2\x15.finance.v1.PspConfigR\tpspConfig\x12'\n" +
 	"\x0fidempotency_key\x18\t \x01(\tR\x0eidempotencyKey\x12\x1b\n" +
 	"\tmt5_login\x18\n" +
-	" \x01(\x03R\bmt5Login\x12\x1d\n" +
+	" \x01(\x03R\bmt5Login\x129\n" +
 	"\n" +
-	"expires_at\x18\v \x01(\tR\texpiresAt\"j\n" +
+	"expires_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\"\x89\x01\n" +
 	"\x16CreateWithdrawResponse\x12\x15\n" +
 	"\x06txn_id\x18\x01 \x01(\tR\x05txnId\x12!\n" +
-	"\freference_id\x18\x02 \x01(\tR\vreferenceId\x12\x16\n" +
-	"\x06status\x18\x03 \x01(\tR\x06status\"J\n" +
+	"\freference_id\x18\x02 \x01(\tR\vreferenceId\x125\n" +
+	"\x06status\x18\x03 \x01(\x0e2\x1d.finance.v1.TransactionStatusR\x06status\"J\n" +
 	"\x16ApproveWithdrawRequest\x12\x15\n" +
 	"\x06txn_id\x18\x01 \x01(\tR\x05txnId\x12\x19\n" +
-	"\badmin_id\x18\x02 \x01(\tR\aadminId\"\x84\x01\n" +
-	"\x17ApproveWithdrawResponse\x12\x16\n" +
-	"\x06status\x18\x01 \x01(\tR\x06status\x12,\n" +
-	"\x12psp_transaction_id\x18\x02 \x01(\tR\x10pspTransactionId\x12#\n" +
-	"\rerror_message\x18\x03 \x01(\tR\ferrorMessage\"a\n" +
+	"\badmin_id\x18\x02 \x01(\tR\aadminId\"~\n" +
+	"\x17ApproveWithdrawResponse\x125\n" +
+	"\x06status\x18\x01 \x01(\x0e2\x1d.finance.v1.TransactionStatusR\x06status\x12,\n" +
+	"\x12psp_transaction_id\x18\x02 \x01(\tR\x10pspTransactionId\"a\n" +
 	"\x15RejectWithdrawRequest\x12\x15\n" +
 	"\x06txn_id\x18\x01 \x01(\tR\x05txnId\x12\x19\n" +
 	"\badmin_id\x18\x02 \x01(\tR\aadminId\x12\x16\n" +
@@ -979,29 +1039,44 @@ const file_proto_finance_v1_finance_proto_rawDesc = "" +
 	"\x15RefundWithdrawRequest\x12\x15\n" +
 	"\x06txn_id\x18\x01 \x01(\tR\x05txnId\x12\x19\n" +
 	"\badmin_id\x18\x02 \x01(\tR\aadminId\x12\x16\n" +
-	"\x06reason\x18\x03 \x01(\tR\x06reason\"D\n" +
-	"\x0eStatusResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\"\xec\x01\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\"\x9e\x02\n" +
 	"\x15CreateTransferRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1f\n" +
-	"\vsource_type\x18\x02 \x01(\tR\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x128\n" +
+	"\vsource_type\x18\x02 \x01(\x0e2\x17.finance.v1.AccountTypeR\n" +
 	"sourceType\x12\x1b\n" +
-	"\tsource_id\x18\x03 \x01(\tR\bsourceId\x12\x1b\n" +
-	"\tdest_type\x18\x04 \x01(\tR\bdestType\x12\x17\n" +
+	"\tsource_id\x18\x03 \x01(\tR\bsourceId\x124\n" +
+	"\tdest_type\x18\x04 \x01(\x0e2\x17.finance.v1.AccountTypeR\bdestType\x12\x17\n" +
 	"\adest_id\x18\x05 \x01(\tR\x06destId\x12\x1d\n" +
 	"\n" +
 	"amount_usd\x18\x06 \x01(\tR\tamountUsd\x12'\n" +
-	"\x0fidempotency_key\x18\a \x01(\tR\x0eidempotencyKey\"G\n" +
+	"\x0fidempotency_key\x18\a \x01(\tR\x0eidempotencyKey\"f\n" +
 	"\x16CreateTransferResponse\x12\x15\n" +
-	"\x06txn_id\x18\x01 \x01(\tR\x05txnId\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status2\x96\x04\n" +
+	"\x06txn_id\x18\x01 \x01(\tR\x05txnId\x125\n" +
+	"\x06status\x18\x02 \x01(\x0e2\x1d.finance.v1.TransactionStatusR\x06status*D\n" +
+	"\vAccountType\x12\x1c\n" +
+	"\x18ACCOUNT_TYPE_UNSPECIFIED\x10\x00\x12\v\n" +
+	"\aTRADING\x10\x01\x12\n" +
+	"\n" +
+	"\x06WALLET\x10\x02*\xb5\x01\n" +
+	"\x11TransactionStatus\x12\"\n" +
+	"\x1eTRANSACTION_STATUS_UNSPECIFIED\x10\x00\x12\v\n" +
+	"\aPENDING\x10\x01\x12\f\n" +
+	"\bAPPROVED\x10\x02\x12\x0e\n" +
+	"\n" +
+	"PROCESSING\x10\x03\x12\r\n" +
+	"\tCOMPLETED\x10\x04\x12\n" +
+	"\n" +
+	"\x06FAILED\x10\x05\x12\r\n" +
+	"\tCANCELLED\x10\x06\x12\v\n" +
+	"\aEXPIRED\x10\a\x12\f\n" +
+	"\bREJECTED\x10\b\x12\f\n" +
+	"\bREFUNDED\x10\t2\x8e\x04\n" +
 	"\x0eFinanceService\x12T\n" +
 	"\rCreateDeposit\x12 .finance.v1.CreateDepositRequest\x1a!.finance.v1.CreateDepositResponse\x12W\n" +
 	"\x0eCreateWithdraw\x12!.finance.v1.CreateWithdrawRequest\x1a\".finance.v1.CreateWithdrawResponse\x12Z\n" +
-	"\x0fApproveWithdraw\x12\".finance.v1.ApproveWithdrawRequest\x1a#.finance.v1.ApproveWithdrawResponse\x12O\n" +
-	"\x0eRejectWithdraw\x12!.finance.v1.RejectWithdrawRequest\x1a\x1a.finance.v1.StatusResponse\x12O\n" +
-	"\x0eRefundWithdraw\x12!.finance.v1.RefundWithdrawRequest\x1a\x1a.finance.v1.StatusResponse\x12W\n" +
+	"\x0fApproveWithdraw\x12\".finance.v1.ApproveWithdrawRequest\x1a#.finance.v1.ApproveWithdrawResponse\x12K\n" +
+	"\x0eRejectWithdraw\x12!.finance.v1.RejectWithdrawRequest\x1a\x16.google.protobuf.Empty\x12K\n" +
+	"\x0eRefundWithdraw\x12!.finance.v1.RefundWithdrawRequest\x1a\x16.google.protobuf.Empty\x12W\n" +
 	"\x0eCreateTransfer\x12!.finance.v1.CreateTransferRequest\x1a\".finance.v1.CreateTransferResponseB?Z=github.com/samsonnaze5/aeternixth-go-lib/finance/v1;financev1b\x06proto3"
 
 var (
@@ -1016,43 +1091,57 @@ func file_proto_finance_v1_finance_proto_rawDescGZIP() []byte {
 	return file_proto_finance_v1_finance_proto_rawDescData
 }
 
-var file_proto_finance_v1_finance_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_proto_finance_v1_finance_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_proto_finance_v1_finance_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_proto_finance_v1_finance_proto_goTypes = []any{
-	(*PspConfig)(nil),               // 0: finance.v1.PspConfig
-	(*CreateDepositRequest)(nil),    // 1: finance.v1.CreateDepositRequest
-	(*CreateDepositResponse)(nil),   // 2: finance.v1.CreateDepositResponse
-	(*CreateWithdrawRequest)(nil),   // 3: finance.v1.CreateWithdrawRequest
-	(*CreateWithdrawResponse)(nil),  // 4: finance.v1.CreateWithdrawResponse
-	(*ApproveWithdrawRequest)(nil),  // 5: finance.v1.ApproveWithdrawRequest
-	(*ApproveWithdrawResponse)(nil), // 6: finance.v1.ApproveWithdrawResponse
-	(*RejectWithdrawRequest)(nil),   // 7: finance.v1.RejectWithdrawRequest
-	(*RefundWithdrawRequest)(nil),   // 8: finance.v1.RefundWithdrawRequest
-	(*StatusResponse)(nil),          // 9: finance.v1.StatusResponse
-	(*CreateTransferRequest)(nil),   // 10: finance.v1.CreateTransferRequest
-	(*CreateTransferResponse)(nil),  // 11: finance.v1.CreateTransferResponse
-	nil,                             // 12: finance.v1.PspConfig.MetadataEntry
+	(AccountType)(0),                // 0: finance.v1.AccountType
+	(TransactionStatus)(0),          // 1: finance.v1.TransactionStatus
+	(*PspConfig)(nil),               // 2: finance.v1.PspConfig
+	(*CreateDepositRequest)(nil),    // 3: finance.v1.CreateDepositRequest
+	(*CreateDepositResponse)(nil),   // 4: finance.v1.CreateDepositResponse
+	(*CreateWithdrawRequest)(nil),   // 5: finance.v1.CreateWithdrawRequest
+	(*CreateWithdrawResponse)(nil),  // 6: finance.v1.CreateWithdrawResponse
+	(*ApproveWithdrawRequest)(nil),  // 7: finance.v1.ApproveWithdrawRequest
+	(*ApproveWithdrawResponse)(nil), // 8: finance.v1.ApproveWithdrawResponse
+	(*RejectWithdrawRequest)(nil),   // 9: finance.v1.RejectWithdrawRequest
+	(*RefundWithdrawRequest)(nil),   // 10: finance.v1.RefundWithdrawRequest
+	(*CreateTransferRequest)(nil),   // 11: finance.v1.CreateTransferRequest
+	(*CreateTransferResponse)(nil),  // 12: finance.v1.CreateTransferResponse
+	nil,                             // 13: finance.v1.PspConfig.MetadataEntry
+	(*timestamppb.Timestamp)(nil),   // 14: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),           // 15: google.protobuf.Empty
 }
 var file_proto_finance_v1_finance_proto_depIdxs = []int32{
-	12, // 0: finance.v1.PspConfig.metadata:type_name -> finance.v1.PspConfig.MetadataEntry
-	0,  // 1: finance.v1.CreateDepositRequest.psp_config:type_name -> finance.v1.PspConfig
-	0,  // 2: finance.v1.CreateWithdrawRequest.psp_config:type_name -> finance.v1.PspConfig
-	1,  // 3: finance.v1.FinanceService.CreateDeposit:input_type -> finance.v1.CreateDepositRequest
-	3,  // 4: finance.v1.FinanceService.CreateWithdraw:input_type -> finance.v1.CreateWithdrawRequest
-	5,  // 5: finance.v1.FinanceService.ApproveWithdraw:input_type -> finance.v1.ApproveWithdrawRequest
-	7,  // 6: finance.v1.FinanceService.RejectWithdraw:input_type -> finance.v1.RejectWithdrawRequest
-	8,  // 7: finance.v1.FinanceService.RefundWithdraw:input_type -> finance.v1.RefundWithdrawRequest
-	10, // 8: finance.v1.FinanceService.CreateTransfer:input_type -> finance.v1.CreateTransferRequest
-	2,  // 9: finance.v1.FinanceService.CreateDeposit:output_type -> finance.v1.CreateDepositResponse
-	4,  // 10: finance.v1.FinanceService.CreateWithdraw:output_type -> finance.v1.CreateWithdrawResponse
-	6,  // 11: finance.v1.FinanceService.ApproveWithdraw:output_type -> finance.v1.ApproveWithdrawResponse
-	9,  // 12: finance.v1.FinanceService.RejectWithdraw:output_type -> finance.v1.StatusResponse
-	9,  // 13: finance.v1.FinanceService.RefundWithdraw:output_type -> finance.v1.StatusResponse
-	11, // 14: finance.v1.FinanceService.CreateTransfer:output_type -> finance.v1.CreateTransferResponse
-	9,  // [9:15] is the sub-list for method output_type
-	3,  // [3:9] is the sub-list for method input_type
-	3,  // [3:3] is the sub-list for extension type_name
-	3,  // [3:3] is the sub-list for extension extendee
-	0,  // [0:3] is the sub-list for field type_name
+	13, // 0: finance.v1.PspConfig.metadata:type_name -> finance.v1.PspConfig.MetadataEntry
+	0,  // 1: finance.v1.CreateDepositRequest.dest_type:type_name -> finance.v1.AccountType
+	2,  // 2: finance.v1.CreateDepositRequest.psp_config:type_name -> finance.v1.PspConfig
+	14, // 3: finance.v1.CreateDepositRequest.expires_at:type_name -> google.protobuf.Timestamp
+	1,  // 4: finance.v1.CreateDepositResponse.status:type_name -> finance.v1.TransactionStatus
+	0,  // 5: finance.v1.CreateWithdrawRequest.source_type:type_name -> finance.v1.AccountType
+	2,  // 6: finance.v1.CreateWithdrawRequest.psp_config:type_name -> finance.v1.PspConfig
+	14, // 7: finance.v1.CreateWithdrawRequest.expires_at:type_name -> google.protobuf.Timestamp
+	1,  // 8: finance.v1.CreateWithdrawResponse.status:type_name -> finance.v1.TransactionStatus
+	1,  // 9: finance.v1.ApproveWithdrawResponse.status:type_name -> finance.v1.TransactionStatus
+	0,  // 10: finance.v1.CreateTransferRequest.source_type:type_name -> finance.v1.AccountType
+	0,  // 11: finance.v1.CreateTransferRequest.dest_type:type_name -> finance.v1.AccountType
+	1,  // 12: finance.v1.CreateTransferResponse.status:type_name -> finance.v1.TransactionStatus
+	3,  // 13: finance.v1.FinanceService.CreateDeposit:input_type -> finance.v1.CreateDepositRequest
+	5,  // 14: finance.v1.FinanceService.CreateWithdraw:input_type -> finance.v1.CreateWithdrawRequest
+	7,  // 15: finance.v1.FinanceService.ApproveWithdraw:input_type -> finance.v1.ApproveWithdrawRequest
+	9,  // 16: finance.v1.FinanceService.RejectWithdraw:input_type -> finance.v1.RejectWithdrawRequest
+	10, // 17: finance.v1.FinanceService.RefundWithdraw:input_type -> finance.v1.RefundWithdrawRequest
+	11, // 18: finance.v1.FinanceService.CreateTransfer:input_type -> finance.v1.CreateTransferRequest
+	4,  // 19: finance.v1.FinanceService.CreateDeposit:output_type -> finance.v1.CreateDepositResponse
+	6,  // 20: finance.v1.FinanceService.CreateWithdraw:output_type -> finance.v1.CreateWithdrawResponse
+	8,  // 21: finance.v1.FinanceService.ApproveWithdraw:output_type -> finance.v1.ApproveWithdrawResponse
+	15, // 22: finance.v1.FinanceService.RejectWithdraw:output_type -> google.protobuf.Empty
+	15, // 23: finance.v1.FinanceService.RefundWithdraw:output_type -> google.protobuf.Empty
+	12, // 24: finance.v1.FinanceService.CreateTransfer:output_type -> finance.v1.CreateTransferResponse
+	19, // [19:25] is the sub-list for method output_type
+	13, // [13:19] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_proto_finance_v1_finance_proto_init() }
@@ -1065,13 +1154,14 @@ func file_proto_finance_v1_finance_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_finance_v1_finance_proto_rawDesc), len(file_proto_finance_v1_finance_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   13,
+			NumEnums:      2,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_proto_finance_v1_finance_proto_goTypes,
 		DependencyIndexes: file_proto_finance_v1_finance_proto_depIdxs,
+		EnumInfos:         file_proto_finance_v1_finance_proto_enumTypes,
 		MessageInfos:      file_proto_finance_v1_finance_proto_msgTypes,
 	}.Build()
 	File_proto_finance_v1_finance_proto = out.File
