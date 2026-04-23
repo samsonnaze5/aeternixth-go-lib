@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Go utility library (`github.com/samsonnaze5/aeternixth-go-lib`) — a collection of 15 reusable packages for backend applications. Requires Go 1.25+.
+Go utility library (`github.com/samsonnaze5/aeternixth-go-lib`) — a collection of 16 reusable packages for backend applications. Requires Go 1.25+.
 
 ## Common Commands
 
@@ -45,3 +45,4 @@ All other packages match their directory names.
 - All exported functions and types have godoc comments with examples
 - `errors` package uses string constants for error codes (`ErrCodeNotFound = "NOT_FOUND"`) mapped to HTTP status codes
 - `null` package follows a consistent pattern: `ToNull{Type}(pointer) → sql.Null{Type}` and `ToNull{Type}Pointer(sqlNull) → *type`
+- `decimal` package is an alias to `github.com/shopspring/decimal.Decimal` offering zero-allocation string parsing and exact math.
