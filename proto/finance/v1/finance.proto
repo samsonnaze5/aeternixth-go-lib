@@ -4,6 +4,7 @@ option go_package = "github.com/samsonnaze5/aeternixth-go-lib/finance/v1;finance
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
+import "validate/validate.proto";
 
 // --- Shared Enums ---
 
@@ -36,14 +37,14 @@ message PspConfig {
 
 // --- Deposit ---
 message CreateDepositRequest {
-  string user_id = 1;
-  AccountType dest_type = 2;
-  string dest_id = 3;
-  string amount_usd = 4;
+  string user_id = 1 [(validate.rules).string.uuid = true];
+  AccountType dest_type = 2 [(validate.rules).enum.defined_only = true];
+  string dest_id = 3 [(validate.rules).string.min_len = 1];
+  string amount_usd = 4 [(validate.rules).string.pattern = "^[0-9]+(\\.[0-9]{1,6})?$"];
   string offer_rate = 5;
   string payment_amount = 6;
-  PspConfig psp_config = 7;
-  string idempotency_key = 8;
+  PspConfig psp_config = 7 [(validate.rules).message.required = true];
+  string idempotency_key = 8 [(validate.rules).string.min_len = 1];
   int64 mt5_login = 9;
   google.protobuf.Timestamp expires_at = 10;
 }
@@ -59,15 +60,15 @@ message CreateDepositResponse {
 
 // --- Withdraw ---
 message CreateWithdrawRequest {
-  string user_id = 1;
-  AccountType source_type = 2;
-  string source_id = 3;
-  string amount_usd = 4;
+  string user_id = 1 [(validate.rules).string.uuid = true];
+  AccountType source_type = 2 [(validate.rules).enum.defined_only = true];
+  string source_id = 3 [(validate.rules).string.min_len = 1];
+  string amount_usd = 4 [(validate.rules).string.pattern = "^[0-9]+(\\.[0-9]{1,6})?$"];
   string bid_rate = 5;
   string payout_amount = 6;
   string payment_currency = 7;
-  PspConfig psp_config = 8;
-  string idempotency_key = 9;
+  PspConfig psp_config = 8 [(validate.rules).message.required = true];
+  string idempotency_key = 9 [(validate.rules).string.min_len = 1];
   int64 mt5_login = 10;
   google.protobuf.Timestamp expires_at = 11;
 }
@@ -102,13 +103,13 @@ message RefundWithdrawRequest {
 
 // --- Internal Transfer ---
 message CreateTransferRequest {
-  string user_id = 1;
-  AccountType source_type = 2;
-  string source_id = 3;
-  AccountType dest_type = 4;
-  string dest_id = 5;
-  string amount_usd = 6;
-  string idempotency_key = 7;
+  string user_id = 1 [(validate.rules).string.uuid = true];
+  AccountType source_type = 2 [(validate.rules).enum.defined_only = true];
+  string source_id = 3 [(validate.rules).string.min_len = 1];
+  AccountType dest_type = 4 [(validate.rules).enum.defined_only = true];
+  string dest_id = 5 [(validate.rules).string.min_len = 1];
+  string amount_usd = 6 [(validate.rules).string.pattern = "^[0-9]+(\\.[0-9]{1,6})?$"];
+  string idempotency_key = 7 [(validate.rules).string.min_len = 1];
 }
 
 message CreateTransferResponse {

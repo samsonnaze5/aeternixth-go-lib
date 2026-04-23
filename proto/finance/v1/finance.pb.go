@@ -7,6 +7,7 @@
 package financev1
 
 import (
+	_ "github.com/envoyproxy/protoc-gen-validate/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -971,7 +972,7 @@ var File_proto_finance_v1_finance_proto protoreflect.FileDescriptor
 const file_proto_finance_v1_finance_proto_rawDesc = "" +
 	"\n" +
 	"\x1eproto/finance/v1/finance.proto\x12\n" +
-	"finance.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\"\xfa\x01\n" +
+	"finance.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x17validate/validate.proto\"\xfa\x01\n" +
 	"\tPspConfig\x12#\n" +
 	"\rprovider_code\x18\x01 \x01(\tR\fproviderCode\x12\x1f\n" +
 	"\vmethod_type\x18\x02 \x01(\tR\n" +
@@ -980,19 +981,19 @@ const file_proto_finance_v1_finance_proto_rawDesc = "" +
 	"\bmetadata\x18\x04 \x03(\v2#.finance.v1.PspConfig.MetadataEntryR\bmetadata\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x9a\x03\n" +
-	"\x14CreateDepositRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x124\n" +
-	"\tdest_type\x18\x02 \x01(\x0e2\x17.finance.v1.AccountTypeR\bdestType\x12\x17\n" +
-	"\adest_id\x18\x03 \x01(\tR\x06destId\x12\x1d\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xea\x03\n" +
+	"\x14CreateDepositRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\x06userId\x12>\n" +
+	"\tdest_type\x18\x02 \x01(\x0e2\x17.finance.v1.AccountTypeB\b\xfaB\x05\x82\x01\x02\x10\x01R\bdestType\x12 \n" +
+	"\adest_id\x18\x03 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\x06destId\x12=\n" +
 	"\n" +
-	"amount_usd\x18\x04 \x01(\tR\tamountUsd\x12\x1d\n" +
+	"amount_usd\x18\x04 \x01(\tB\x1e\xfaB\x1br\x192\x17^[0-9]+(\\.[0-9]{1,6})?$R\tamountUsd\x12\x1d\n" +
 	"\n" +
 	"offer_rate\x18\x05 \x01(\tR\tofferRate\x12%\n" +
-	"\x0epayment_amount\x18\x06 \x01(\tR\rpaymentAmount\x124\n" +
+	"\x0epayment_amount\x18\x06 \x01(\tR\rpaymentAmount\x12>\n" +
 	"\n" +
-	"psp_config\x18\a \x01(\v2\x15.finance.v1.PspConfigR\tpspConfig\x12'\n" +
-	"\x0fidempotency_key\x18\b \x01(\tR\x0eidempotencyKey\x12\x1b\n" +
+	"psp_config\x18\a \x01(\v2\x15.finance.v1.PspConfigB\b\xfaB\x05\x8a\x01\x02\x10\x01R\tpspConfig\x120\n" +
+	"\x0fidempotency_key\x18\b \x01(\tB\a\xfaB\x04r\x02\x10\x01R\x0eidempotencyKey\x12\x1b\n" +
 	"\tmt5_login\x18\t \x01(\x03R\bmt5Login\x129\n" +
 	"\n" +
 	"expires_at\x18\n" +
@@ -1004,20 +1005,20 @@ const file_proto_finance_v1_finance_proto_rawDesc = "" +
 	"\vpayment_url\x18\x04 \x01(\tR\n" +
 	"paymentUrl\x12,\n" +
 	"\x12psp_transaction_id\x18\x05 \x01(\tR\x10pspTransactionId\x125\n" +
-	"\x06status\x18\x06 \x01(\x0e2\x1d.finance.v1.TransactionStatusR\x06status\"\xc8\x03\n" +
-	"\x15CreateWithdrawRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x128\n" +
-	"\vsource_type\x18\x02 \x01(\x0e2\x17.finance.v1.AccountTypeR\n" +
-	"sourceType\x12\x1b\n" +
-	"\tsource_id\x18\x03 \x01(\tR\bsourceId\x12\x1d\n" +
+	"\x06status\x18\x06 \x01(\x0e2\x1d.finance.v1.TransactionStatusR\x06status\"\x98\x04\n" +
+	"\x15CreateWithdrawRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\x06userId\x12B\n" +
+	"\vsource_type\x18\x02 \x01(\x0e2\x17.finance.v1.AccountTypeB\b\xfaB\x05\x82\x01\x02\x10\x01R\n" +
+	"sourceType\x12$\n" +
+	"\tsource_id\x18\x03 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\bsourceId\x12=\n" +
 	"\n" +
-	"amount_usd\x18\x04 \x01(\tR\tamountUsd\x12\x19\n" +
+	"amount_usd\x18\x04 \x01(\tB\x1e\xfaB\x1br\x192\x17^[0-9]+(\\.[0-9]{1,6})?$R\tamountUsd\x12\x19\n" +
 	"\bbid_rate\x18\x05 \x01(\tR\abidRate\x12#\n" +
 	"\rpayout_amount\x18\x06 \x01(\tR\fpayoutAmount\x12)\n" +
-	"\x10payment_currency\x18\a \x01(\tR\x0fpaymentCurrency\x124\n" +
+	"\x10payment_currency\x18\a \x01(\tR\x0fpaymentCurrency\x12>\n" +
 	"\n" +
-	"psp_config\x18\b \x01(\v2\x15.finance.v1.PspConfigR\tpspConfig\x12'\n" +
-	"\x0fidempotency_key\x18\t \x01(\tR\x0eidempotencyKey\x12\x1b\n" +
+	"psp_config\x18\b \x01(\v2\x15.finance.v1.PspConfigB\b\xfaB\x05\x8a\x01\x02\x10\x01R\tpspConfig\x120\n" +
+	"\x0fidempotency_key\x18\t \x01(\tB\a\xfaB\x04r\x02\x10\x01R\x0eidempotencyKey\x12\x1b\n" +
 	"\tmt5_login\x18\n" +
 	" \x01(\x03R\bmt5Login\x129\n" +
 	"\n" +
@@ -1039,17 +1040,17 @@ const file_proto_finance_v1_finance_proto_rawDesc = "" +
 	"\x15RefundWithdrawRequest\x12\x15\n" +
 	"\x06txn_id\x18\x01 \x01(\tR\x05txnId\x12\x19\n" +
 	"\badmin_id\x18\x02 \x01(\tR\aadminId\x12\x16\n" +
-	"\x06reason\x18\x03 \x01(\tR\x06reason\"\x9e\x02\n" +
-	"\x15CreateTransferRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x128\n" +
-	"\vsource_type\x18\x02 \x01(\x0e2\x17.finance.v1.AccountTypeR\n" +
-	"sourceType\x12\x1b\n" +
-	"\tsource_id\x18\x03 \x01(\tR\bsourceId\x124\n" +
-	"\tdest_type\x18\x04 \x01(\x0e2\x17.finance.v1.AccountTypeR\bdestType\x12\x17\n" +
-	"\adest_id\x18\x05 \x01(\tR\x06destId\x12\x1d\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\"\xf7\x02\n" +
+	"\x15CreateTransferRequest\x12!\n" +
+	"\auser_id\x18\x01 \x01(\tB\b\xfaB\x05r\x03\xb0\x01\x01R\x06userId\x12B\n" +
+	"\vsource_type\x18\x02 \x01(\x0e2\x17.finance.v1.AccountTypeB\b\xfaB\x05\x82\x01\x02\x10\x01R\n" +
+	"sourceType\x12$\n" +
+	"\tsource_id\x18\x03 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\bsourceId\x12>\n" +
+	"\tdest_type\x18\x04 \x01(\x0e2\x17.finance.v1.AccountTypeB\b\xfaB\x05\x82\x01\x02\x10\x01R\bdestType\x12 \n" +
+	"\adest_id\x18\x05 \x01(\tB\a\xfaB\x04r\x02\x10\x01R\x06destId\x12=\n" +
 	"\n" +
-	"amount_usd\x18\x06 \x01(\tR\tamountUsd\x12'\n" +
-	"\x0fidempotency_key\x18\a \x01(\tR\x0eidempotencyKey\"f\n" +
+	"amount_usd\x18\x06 \x01(\tB\x1e\xfaB\x1br\x192\x17^[0-9]+(\\.[0-9]{1,6})?$R\tamountUsd\x120\n" +
+	"\x0fidempotency_key\x18\a \x01(\tB\a\xfaB\x04r\x02\x10\x01R\x0eidempotencyKey\"f\n" +
 	"\x16CreateTransferResponse\x12\x15\n" +
 	"\x06txn_id\x18\x01 \x01(\tR\x05txnId\x125\n" +
 	"\x06status\x18\x02 \x01(\x0e2\x1d.finance.v1.TransactionStatusR\x06status*D\n" +
