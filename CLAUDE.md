@@ -2,6 +2,50 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Behavioral Guidelines
+
+These guidelines reduce common LLM coding mistakes. They bias toward caution over speed — for trivial tasks, use judgment.
+
+### Simplicity First
+
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+**Before sending: pass 3 filters.** If any fails, revise *before* the user pushes back — not after.
+
+- **Over-engineering** — went beyond what was asked → cut what wasn't requested
+- **AI smell** — looks generated (commentary on every line, abstractions used once, error handling for cases that can't happen) → rewrite
+- **Generic** — vague catch-all (one error handler swallows everything, function tries to do many things) → make specific to the actual case
+
+### Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" → "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"
+- "Refactor X" → "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan:
+```
+1. [Step] → verify: [check]
+2. [Step] → verify: [check]
+3. [Step] → verify: [check]
+```
+
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+**If the first attempt is structurally wrong, rewrite — don't patch.** Refining a bad approach line by line costs more than starting over. Signal: you find yourself fixing the same architectural choice in 3+ places, or each "fix" introduces a new problem. When in doubt, propose the rewrite to the user before silently iterating.
+
+---
+
 ## Project Overview
 
 Go utility library (`github.com/samsonnaze5/aeternixth-go-lib`) — a collection of 16 reusable packages for backend applications. Requires Go 1.25+.
