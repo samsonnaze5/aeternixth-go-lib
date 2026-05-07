@@ -9,6 +9,13 @@ import (
 	apperrors "github.com/samsonnaze5/aeternixth-go-lib/errors"
 )
 
+// Logger defines the logging contract used by middleware to log errors.
+// It is designed to be compatible with structured loggers (e.g., Zap, Logrus).
+type Logger interface {
+	Errorf(format string, args ...interface{})
+	Warnf(format string, args ...interface{})
+}
+
 // ErrorHandler returns a global [fiber.ErrorHandler] that converts errors into
 // standardized JSON error responses using the [apperrors.ErrorResponse] format.
 //
@@ -31,9 +38,9 @@ import (
 // Usage — assign as the Fiber app's error handler:
 //
 //	app := fiber.New(fiber.Config{
-//	    ErrorHandler: middleware.ErrorHandler(),
+//	    ErrorHandler: middleware.ErrorHandler(logger),
 //	})
-func ErrorHandler() fiber.ErrorHandler {
+func ErrorHandler(logger Logger) fiber.ErrorHandler {
 	return func(c *fiber.Ctx, err error) error {
 		// Default error response
 		statusCode := fiber.StatusInternalServerError
@@ -73,17 +80,22 @@ func ErrorHandler() fiber.ErrorHandler {
 			}
 		} else {
 			// Handle unexpected errors — log raw error but do NOT expose to client
-			log.Printf("Unexpected error: %v", err)
+			if logger != nil {
+				logger.Errorf("Unexpected error: %v", err)
+			} else {
+				log.Printf("Unexpected error: %v", err)
+			}
 		}
 
 		// Log errors (except client errors)
 		if statusCode >= 500 {
-			log.Printf("[ERROR] %s %s - Status: %d, Error: %v",
-				c.Method(),
-				c.Path(),
-				statusCode,
-				err,
-			)
+			if logger != nil {
+				logger.Errorf("%s %s - Status: %d, Error: %v", c.Method(), c.Path(), statusCode, err)
+			} else {
+				log.Printf("[ERROR] %s %s - Status: %d, Error: %v", c.Method(), c.Path(), statusCode, err)
+			}
+		} else if statusCode >= 400 && logger != nil {
+			logger.Warnf("%s %s - Status: %d, Error: %v", c.Method(), c.Path(), statusCode, err)
 		}
 
 		// Set response headers
@@ -144,7 +156,7 @@ func getErrorCodeFromStatus(statusCode int) string {
 // Example:
 //
 //	app := fiber.New(fiber.Config{
-//	    ErrorHandler: middleware.ErrorHandler(),
+//	    ErrorHandler: middleware.ErrorHandler(logger),
 //	})
 //	app.Use(middleware.RecoverMiddleware())
 func RecoverMiddleware() fiber.Handler {
@@ -195,7 +207,7 @@ func RecoverMiddleware() fiber.Handler {
 // Example:
 //
 //	app := fiber.New(fiber.Config{
-//	    ErrorHandler: middleware.ErrorHandler(),
+//	    ErrorHandler: middleware.ErrorHandler(logger),
 //	})
 //	// ... register all routes ...
 //	app.Use(middleware.NotFoundHandler()) // catch-all at the end
