@@ -61,7 +61,7 @@ task format           # Format code (gofmt + goimports via Taskfile)
 
 ## Architecture
 
-Flat package structure — each directory is an independent utility package with no cross-package dependencies (except `response` depends on `errors`, `fiber` depends on `middleware`/`errors`/`validator`, and `middleware` depends on `errors`/`jwt`).
+Flat package structure — each directory is an independent utility package with no cross-package dependencies (except `response` depends on `errors`, `fiber` depends on `middleware`/`errors`/`validator`, `middleware` depends on `errors`/`jwt`, and the `observability/health/{healthfiber,healthredis,healthgorm,healthkafka}` sub-packages each depend on `observability/health` for the `Pinger` interface and path constants).
 
 **Critical: directory names differ from package names for several packages:**
 
@@ -92,6 +92,5 @@ All other packages match their directory names.
 - `decimal` package is an alias to `github.com/shopspring/decimal.Decimal` offering zero-allocation string parsing and exact math.
 
 <!-- SPECKIT START -->
-For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan
+Active feature plan: [specs/001-health-probes/plan.md](specs/001-health-probes/plan.md) — `observability/health` package + sub-packages (`healthfiber`, `healthredis`, `healthgorm`, `healthkafka`). Domain language in [CONTEXT.md](CONTEXT.md); architectural decisions in [docs/adr/0001](docs/adr/0001-kafka-pinger-uses-metadata-rpc.md), [docs/adr/0002](docs/adr/0002-kubernetes-probe-spec-guidance.md). Branch: `001-health-probes`.
 <!-- SPECKIT END -->

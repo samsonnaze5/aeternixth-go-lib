@@ -31,7 +31,24 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Verify the plan against the four principles in `.specify/memory/constitution.md`.
+Mark each gate PASS / FAIL / N/A and justify any deviation in **Complexity Tracking**.
+
+- **I. Code Quality & Simplicity** — Plan introduces no speculative abstractions;
+  new exports have godoc + example; package boundaries stay within the documented
+  dependency graph; errors are values with `Err{Description}` sentinels where
+  applicable.
+- **II. Testing Standards** — Each new exported function has a planned unit test
+  (happy + failure path); cross-package behavior has an integration test; no
+  internal-package mocking; bug fixes ship with a regression test.
+- **III. API Consistency & Developer Experience** — Constructors `New{Type}` return
+  `(*T, error)`; converter pairs follow `To{Type}` / `To{Type}Pointer`; nullable
+  values use pointers or `Null{Type}`; generics only where they remove unsafe
+  assertions; any new directory/package-name divergence is added to `CLAUDE.md`.
+- **IV. Performance Requirements** — Hot-path additions have a `Benchmark*` test
+  with `-benchmem`; concurrency-safe types document guarantees and have `-race`
+  coverage; spawned goroutines have a deterministic termination path; benchmark
+  regressions >10% are explicitly justified.
 
 ## Project Structure
 

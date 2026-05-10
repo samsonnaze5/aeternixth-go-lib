@@ -1,0 +1,9 @@
+goos: darwin
+goarch: arm64
+pkg: github.com/samsonnaze5/aeternixth-go-lib/observability/health
+cpu: Apple M5
+BenchmarkLiveHandler-10                      	 9219328	       251.2 ns/op	    1008 B/op	       9 allocs/op
+BenchmarkReadyHandler_AllPass_5Pingers-10    	  603471	      3977 ns/op	    3386 B/op	      46 allocs/op
+BenchmarkReadyHandler_OneSlow_5Pingers-10    	    1891	   1286932 ns/op	    3748 B/op	      50 allocs/op
+PASS
+ok  	github.com/samsonnaze5/aeternixth-go-lib/observability/health	8.109s
