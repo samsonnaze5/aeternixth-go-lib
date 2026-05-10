@@ -90,3 +90,8 @@ All other packages match their directory names.
 - `errors` package uses string constants for error codes (`ErrCodeNotFound = "NOT_FOUND"`) mapped to HTTP status codes
 - `null` package follows a consistent pattern: `ToNull{Type}(pointer) → sql.Null{Type}` and `ToNull{Type}Pointer(sqlNull) → *type`
 - `decimal` package is an alias to `github.com/shopspring/decimal.Decimal` offering zero-allocation string parsing and exact math.
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->
