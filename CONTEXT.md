@@ -2,6 +2,10 @@
 
 A Go utility library for backend services. Most packages are flat technical utilities (`null`, `pagination`, `decimal`, etc.); this document captures domain language only for packages where terms have stable meanings that consumers (engineers, operators, runbooks, dashboards) depend on.
 
+## observability/ — umbrella
+
+`observability/` is the umbrella for cross-cutting "what's the system doing right now" primitives shared across every Go service in the fleet. `observability/health/` is the only populated sub-package today; planned siblings (`tracer/`, `logger/`, `metrics/`, `middleware/`) are documented in [observability/README.md](observability/README.md). Each lands when extraction would eliminate duplicated code in two or more adopters.
+
 ## observability/health — language
 
 `observability/health` and its sub-packages (`healthfiber`, `healthredis`, `healthgorm`, `healthkafka`) provide Kubernetes-style liveness and readiness probes for services that consume this lib. Audience for these terms: engineers wiring up probes AND operators/SREs writing runbooks and Kubernetes probe specs against the resulting endpoints.
@@ -17,8 +21,12 @@ Every external dependency the service needs to make forward progress is reachabl
 _Avoid_: healthy (overloaded with Live), available, serving.
 
 **Pinger**:
-Anything that satisfies `Ping(ctx context.Context) error` — the single-method contract every readiness check resolves to. The library provides adapter sub-packages for common dependencies (Redis, GORM, Kafka); `*pgxpool.Pool` and `clickhouse.Conn` already satisfy the interface natively.
+Anything that satisfies `Ping(ctx context.Context) error` — the single-method contract every readiness check resolves to. The library provides adapter sub-packages for common dependencies (Redis, GORM, Kafka); `*pgxpool.Pool` and `clickhouse.Conn` already satisfy the interface natively. For one-off custom checks (HTTP API, gRPC health, custom lag thresholds), wrap a function with `PingFunc`.
 _Avoid_: HealthCheck, Checker, Probe (Probe means the HTTP endpoint, not the dependency).
+
+**PingFunc**:
+A function adapter for **Pinger** — `health.PingFunc(myFunc)` makes any function with signature `func(context.Context) error` satisfy the contract. The canonical primitive for one-off readiness checks that don't justify a typed adapter, mirroring the `http.HandlerFunc` pattern from the standard library.
+_Avoid_: PingFn (the trailing "Func" mirrors stdlib idiom).
 
 **Probe**:
 A single HTTP endpoint Kubernetes polls — `/health/livez` or `/health/readyz`. A **Probe** runs zero or more **Pinger**s in parallel under a fixed 800 ms internal deadline.
