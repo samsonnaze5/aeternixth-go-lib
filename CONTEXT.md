@@ -70,3 +70,36 @@ Failed checks include an `error` field with the underlying message; `omitempty` 
 
 - "healthy" was used to mean both **Live** (process up) and **Ready** (dependencies reachable). Resolved: use **Live** and **Ready** explicitly; do not use "healthy" in package names, exported symbols, or runbook text.
 - "HealthCheck" was used to mean both the HTTP endpoint (a **Probe**) and a single dependency check (a **Pinger**). Resolved: **Probe** is the endpoint, **Pinger** is the dependency.
+
+## itestkit — language
+
+`itestkit` is the integration-test infrastructure package: `StartStack` spins up real PostgreSQL/ClickHouse/Redis/Kafka/HTTP-mock/LocalStack containers via Testcontainers Go and returns connection information. The language below is shared between the lib and every consumer's `tests/integration/` package, so engineers moving between repos read the same surface.
+
+### Terms
+
+**Stack**:
+The active set of running infrastructure dependencies created by `StartStack` and returned as `*itestkit.Stack`. One per `go test` process. Owns the Docker network, every container, and the `Cleanup` function. Every consumer holds it in a package-level `Stack` variable inside `tests/integration/bootstrap.go`.
+_Avoid_: environment, fixtures, harness, containers.
+
+**Instance**:
+A named member of a **Service Map** — e.g., the `"main"` in `Postgres: map[string]PostgresOptions{"main": …}`. Container names, DSNs, env vars, testdata directories, and helper calls are all keyed by this name. Must match `^[a-z][a-z0-9_-]*$`. The first **Instance** of each service is canonically named `main` (Postgres, Kafka) / `cache` (Redis) / `events` (ClickHouse); consumers SHOULD override with a DDD-bounded-context or production-service name when one applies (e.g., `ledger`, `orders`).
+_Avoid_: shard, tenant, database (a single **Instance** can host several databases).
+
+**Service Map**:
+The `map[string]XxxOptions` field per service type inside `StackOptions`. Empty map disables that service.
+_Avoid_: services list, service config.
+
+**Reset**:
+The per-test isolation operation exposed as `itest.Reset(t)` in every consumer's `tests/integration/helpers.go`. TRUNCATEs every non-system table in every Postgres and ClickHouse **Instance**, `FLUSHALL`s every Redis **Instance**, and re-applies the original MockServer/WireMock expectations. Kafka and LocalStack are not reset — tests use per-test consumer-group IDs and per-test resource names instead.
+_Avoid_: cleanup (cleanup is the **Stack** teardown registered with `t.Cleanup`), setup.
+
+### Relationships
+
+- A **Stack** has zero or more **Instances** per service type, indexed by the **Service Map** key.
+- Every consumer helper is `Helper(t *testing.T, name string)` — `name` is the **Instance** name. No shorthand for the single-**Instance** case; explicit names everywhere.
+- **Reset** assumes a sequential **Stack** — integration tests MUST NOT call `t.Parallel()`.
+
+### Example dialogue
+
+> **Dev:** "ใน test เราต้อง TRUNCATE table เองหรือเปล่า?"
+> **Reviewer:** "ทุก test เริ่มด้วย `itest.Reset(t)`. มันจะ TRUNCATE ทุก table ใน **Instance** ของ Postgres/ClickHouse, FLUSHALL Redis, reset mocks ให้เอง. แต่ Kafka ไม่ถูก reset — test ต้องใช้ consumer group เฉพาะ (เช่น `t.Name()`) เพื่อไม่ให้ message ข้าม test."
