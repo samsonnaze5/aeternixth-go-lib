@@ -13,13 +13,17 @@ Shared **observability primitives** for services that consume `aeternixth-go-lib
 | [`health/healthredis/`](./health/healthredis/) | Pinger adapter for `*redis.Client`. |
 | [`health/healthgorm/`](./health/healthgorm/) | Pinger adapter for `*gorm.DB`. |
 | [`health/healthkafka/`](./health/healthkafka/) | Metadata-RPC Pinger adapter for Kafka brokers + topics ([ADR-0001](../docs/adr/0001-kafka-pinger-uses-metadata-rpc.md)). |
+| [`otel/`](./otel/) | OpenTelemetry SDK lifecycle — one `Provider` for traces, the Prometheus → OTLP metric bridge, and the OTLP log pipeline ([ADR-0004](../docs/adr/0004-otel-provider-bundles-three-signals.md)). |
+| [`otel/otelkafka/`](./otel/otelkafka/) | W3C trace-context carrier for segmentio/kafka-go headers. |
+| [`otel/otelgorm/`](./otel/otelgorm/) | GORM query spans — child-only (no span without a parent), no bind values. |
+| [`otel/otelfiber/`](./otel/otelfiber/) | Fiber middleware opening the server root span per request. |
+| [`logger/`](./logger/) | `slog` JSON logger setup. |
+| [`tracer/`](./tracer/) | **Deprecated** — superseded by `otel/`. |
 
 ### Planned
 
 | Path | Purpose | Trigger |
 |---|---|---|
-| `tracer/` | OpenTelemetry SDK lifecycle — `Provider` constructor with OTLP / stdout / no-op exporter selection, resource attributes, propagator wiring, deterministic shutdown. | Currently each repo writes ~150 LoC of SDK setup; extract when a second adopter (after `onetrust-feeder`) is ready to migrate. |
-| `logger/` | `slog` setup (level parsing, JSON handler, default writer). Coexists with the existing `logutil/` debug helper at the repo root — they serve different purposes (`logger` = production structured output; `logutil` = debug print). | When the second repo replicates feeder's `NewLogger(level, w)` pattern. |
 | `metrics/` | `prometheus.Registry` helper — collector registration conventions, default labels (`service`, `version`), build-info gauge. | When two adopters need the same registry shape. |
 | `middleware/` | HTTP middleware that wires `tracer` + `logger` + `metrics` automatically (request span, structured access log, request-duration histogram). | Once `tracer`, `logger`, `metrics` exist and an adopter wants the bundled package. |
 
@@ -29,7 +33,7 @@ The planned set is forward-looking — each sub-package lands only when extracti
 
 When adding a sibling under `observability/`:
 
-1. **One concern per sub-package.** `tracer/` is OpenTelemetry traces, full stop. Don't bundle metrics into it.
+1. **One concern per sub-package.** Exception: `otel/` bundles the three OTel signals because every adopter constructs and shuts them down together ([ADR-0004](../docs/adr/0004-otel-provider-bundles-three-signals.md)).
 2. **Adapters live in nested sub-packages with a prefix.** Pattern: `health/healthredis/`, `health/healthgorm/`. The prefix avoids import-name collisions with the underlying client (`healthredis` next to `redis`, `healthkafka` next to `kafka`).
 3. **Constructors `New{Type}(...) (*T, error)`** with sentinel errors named `Err{Description}`, per the project [constitution](../.specify/memory/constitution.md) Principle III.
 4. **Fixed paths and budgets are values, not knobs.** `health` package fixes the probe paths and the 800 ms internal deadline — exposing them as configuration would defeat the consistency that makes a shared library worthwhile. Apply the same discipline here.

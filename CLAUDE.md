@@ -61,7 +61,7 @@ task format           # Format code (gofmt + goimports via Taskfile)
 
 ## Architecture
 
-Flat package structure — each directory is an independent utility package with no cross-package dependencies (except `response` depends on `errors`, `fiber` depends on `middleware`/`errors`/`validator`, `middleware` depends on `errors`/`jwt`, and the `observability/health/{healthfiber,healthredis,healthgorm,healthkafka}` sub-packages each depend on `observability/health` for the `Pinger` interface and path constants).
+Flat package structure — each directory is an independent utility package with no cross-package dependencies (except `response` depends on `errors`, `fiber` depends on `middleware`/`errors`/`validator`, `middleware` depends on `errors`/`jwt`, and the `observability/health/{healthfiber,healthredis,healthgorm,healthkafka}` sub-packages each depend on `observability/health` for the `Pinger` interface and path constants; the `observability/otel/{otelkafka,otelgorm,otelfiber}` sub-packages import nothing from `observability/otel` — they use the OTel globals it installs).
 
 **Critical: directory names differ from package names for several packages:**
 

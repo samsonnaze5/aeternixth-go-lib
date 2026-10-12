@@ -13,4 +13,8 @@
 // caller-supplied one. Combined with otel/sdk/trace/tracetest, this
 // lets tests assert exactly which spans the production code emits
 // without batching, timers, or flush races.
+//
+// Deprecated: use observability/otel, which adds the Prometheus metric
+// bridge and the OTLP log pipeline behind the same Provider shape. See
+// docs/adr/0004-otel-provider-bundles-three-signals.md.
 package tracer

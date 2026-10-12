@@ -4,7 +4,7 @@ A Go utility library for backend services. Most packages are flat technical util
 
 ## observability/ — umbrella
 
-`observability/` is the umbrella for cross-cutting "what's the system doing right now" primitives shared across every Go service in the fleet. `observability/health/` is the only populated sub-package today; planned siblings (`tracer/`, `logger/`, `metrics/`, `middleware/`) are documented in [observability/README.md](observability/README.md). Each lands when extraction would eliminate duplicated code in two or more adopters.
+`observability/` is the umbrella for cross-cutting "what's the system doing right now" primitives shared across every Go service in the fleet. Populated today: `health/` (probes), `otel/` (OpenTelemetry SDK + instrumentation adapters), `logger/`; planned siblings are documented in [observability/README.md](observability/README.md). Each lands when extraction would eliminate duplicated code in two or more adopters.
 
 ## observability/health — language
 
@@ -70,6 +70,17 @@ Failed checks include an `error` field with the underlying message; `omitempty` 
 
 - "healthy" was used to mean both **Live** (process up) and **Ready** (dependencies reachable). Resolved: use **Live** and **Ready** explicitly; do not use "healthy" in package names, exported symbols, or runbook text.
 - "HealthCheck" was used to mean both the HTTP endpoint (a **Probe**) and a single dependency check (a **Pinger**). Resolved: **Probe** is the endpoint, **Pinger** is the dependency.
+
+## observability/otel — language
+
+**Provider**: the per-binary owner of the OTel SDK — tracer, meter (Prometheus bridge), and logger providers — created once at startup and shut down once at exit.
+
+**Root span**: a span with no parent; it starts a trace. Only entry points create one — an inbound HTTP request (`otelfiber`) or a Kafka message with no `traceparent` header.
+
+**Child-only**: the `otelgorm` policy — a query span exists only under an active span. A query on `context.Background()` is not traced.
+_Avoid_: "orphan span" for a root span that should have had a parent; say root span and name the missing propagation.
+
+**Propagation**: carrying `traceparent` (and `baggage`) across a process boundary — HTTP headers, Kafka headers (`otelkafka`), or a persisted outbox row.
 
 ## itestkit — language
 
