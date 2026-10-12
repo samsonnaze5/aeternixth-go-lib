@@ -104,7 +104,9 @@ type Config struct {
 	// wrapped in ParentBased so child spans follow their parent.
 	SampleRate float64
 
-	// SpanQueueSize bounds the BatchSpanProcessor's in-memory queue.
+	// SpanQueueSize bounds the BatchSpanProcessor's in-memory queue. Zero
+	// (or negative) keeps the SDK default (2048) — a zero-length queue would
+	// drop almost every span silently.
 	SpanQueueSize int
 
 	// PrometheusBridge pushes every metric of the gatherer supplied via
@@ -240,7 +242,11 @@ func New(ctx context.Context, cfg Config, options ...Option) (*Provider, error) 
 	case o.spanExporterOverride != nil:
 		tpOpts = append(tpOpts, sdktrace.WithSyncer(spanExp))
 	case spanExp != nil:
-		tpOpts = append(tpOpts, sdktrace.WithBatcher(spanExp, sdktrace.WithMaxQueueSize(cfg.SpanQueueSize)))
+		var bspOpts []sdktrace.BatchSpanProcessorOption
+		if cfg.SpanQueueSize > 0 {
+			bspOpts = append(bspOpts, sdktrace.WithMaxQueueSize(cfg.SpanQueueSize))
+		}
+		tpOpts = append(tpOpts, sdktrace.WithBatcher(spanExp, bspOpts...))
 	}
 	tp := sdktrace.NewTracerProvider(tpOpts...)
 	shutdowns = append(shutdowns, tp.Shutdown)

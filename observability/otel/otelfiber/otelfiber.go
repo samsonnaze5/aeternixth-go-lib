@@ -28,6 +28,20 @@ const (
 	attrStatusCode = "http.response.status_code"
 )
 
+// Option customises Middleware.
+type Option func(*options)
+
+type options struct{ public bool }
+
+// WithPublicEndpoint marks the app as reachable by callers outside the
+// fleet (e.g. third-party webhooks). An incoming traceparent is then only
+// recorded as a span link: the server span starts a new trace sampled by
+// the local sampler, so a caller cannot force sampling or inject baggage
+// that would travel on through Kafka headers.
+func WithPublicEndpoint() Option {
+	return func(o *options) { o.public = true }
+}
+
 // Middleware returns a handler that starts a SpanKindServer span named
 // "<METHOD> <route template>" (e.g. "GET /users/:id"), stores it in
 // c.UserContext(), and records the response status code. 5xx responses
@@ -41,16 +55,27 @@ const (
 // The raw request path is never recorded: it may carry identifiers. A
 // request that matches no handler is named after the last middleware
 // route it passed through (e.g. "GET /" for app.Use without a prefix).
-func Middleware() fiber.Handler {
+func Middleware(opts ...Option) fiber.Handler {
+	var o options
+	for _, opt := range opts {
+		opt(&o)
+	}
 	tracer := otelapi.GetTracerProvider().Tracer(tracerName)
 
 	return func(c *fiber.Ctx) error {
 		method := strings.Clone(c.Method())
-		ctx := otelapi.GetTextMapPropagator().Extract(c.UserContext(), requestCarrier{c: c})
-		ctx, span := tracer.Start(ctx, method,
+		startOpts := []trace.SpanStartOption{
 			trace.WithSpanKind(trace.SpanKindServer),
 			trace.WithAttributes(attribute.String(attrMethod, method)),
-		)
+		}
+		ctx := c.UserContext()
+		remote := otelapi.GetTextMapPropagator().Extract(ctx, requestCarrier{c: c})
+		if !o.public {
+			ctx = remote
+		} else if sc := trace.SpanContextFromContext(remote); sc.IsValid() {
+			startOpts = append(startOpts, trace.WithLinks(trace.Link{SpanContext: sc}))
+		}
+		ctx, span := tracer.Start(ctx, method, startOpts...)
 		defer span.End()
 		c.SetUserContext(ctx)
 

@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	otelapi "go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -115,5 +116,48 @@ func TestMiddleware(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestMiddleware_PublicEndpoint_LinksInsteadOfParenting(t *testing.T) {
+	exp := tracetest.NewInMemoryExporter()
+	tp := sdktrace.NewTracerProvider(sdktrace.WithSyncer(exp))
+	prevTP, prevProp := otelapi.GetTracerProvider(), otelapi.GetTextMapPropagator()
+	otelapi.SetTracerProvider(tp)
+	otelapi.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{}))
+	t.Cleanup(func() {
+		otelapi.SetTracerProvider(prevTP)
+		otelapi.SetTextMapPropagator(prevProp)
+		_ = tp.Shutdown(context.Background())
+	})
+
+	var gotBaggage string
+	app := fiber.New()
+	app.Use(otelfiber.Middleware(otelfiber.WithPublicEndpoint()))
+	app.Post("/callback", func(c *fiber.Ctx) error {
+		gotBaggage = baggage.FromContext(c.UserContext()).String()
+		return c.SendStatus(fiber.StatusOK)
+	})
+
+	req := httptest.NewRequest("POST", "/callback", nil)
+	req.Header.Set("traceparent", incomingTraceparent)
+	req.Header.Set("baggage", "tenant=evil")
+	if _, err := app.Test(req); err != nil {
+		t.Fatalf("app.Test: %v", err)
+	}
+
+	spans := exp.GetSpans()
+	if len(spans) != 1 {
+		t.Fatalf("spans: want 1, got %d", len(spans))
+	}
+	s := spans[0]
+	if s.Parent.IsValid() {
+		t.Errorf("parent: want new root trace, got parent %s", s.Parent.TraceID())
+	}
+	if len(s.Links) != 1 || s.Links[0].SpanContext.TraceID().String() != "4bf92f3577b34da6a3ce929d0e0e4736" {
+		t.Errorf("links: want one link to the incoming trace, got %v", s.Links)
+	}
+	if gotBaggage != "" {
+		t.Errorf("baggage: want none from a public caller, got %q", gotBaggage)
 	}
 }
